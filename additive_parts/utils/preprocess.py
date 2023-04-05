@@ -17,5 +17,5 @@ def seven_dim_extraction(mesh_path):
     mesh.fix_normals()
     normals = mesh.face_normals
     centers = mesh.triangles_center
-    sizes = mesh.area_faces
+    sizes = mesh.area_faces.reshape((-1, 1))
     return np.hstack([centers, normals, sizes])
