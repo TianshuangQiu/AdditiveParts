@@ -1,6 +1,7 @@
 import os
 import json
 import csv
+import re
 from tqdm.contrib.concurrent import process_map
 
 
@@ -16,10 +17,54 @@ class JsonMaker:
             for f in os.listdir(self.csv_dir)
             if os.isfile(os.join(self.csv_dir, f) and f.endswith(".csv"))
         ]
+        data_array = process_map(self._json_helper, files)
+        vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
+        for d in data_array:
+            vox_256_dict.update(d[0])
+            stl_dict.update(d[1])
+            vox_64_dict.update(d[2])
+
+        with open(f"{output_path}/vox_256.json", "w") as w:
+            json.dump(vox_256_dict, w)
+        with open(f"{output_path}/stl.json", "w") as w:
+            json.dump(stl_dict, w)
+        with open(f"{output_path}/vox_64.json", "w") as w:
+            json.dump(vox_64_dict, w)
 
     def _json_helper(self, csv_path):
         with open(csv_path, newline="") as csvfile:
             data = list(csv.reader(csvfile))
+        vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
         for i, d in enumerate(data):
-            data[i] = csv_path.split(os.sep)[-1][:-4] + d
-        return data
+            csv_name = csv_path.split(os.sep)[-1][:-4]
+            part_group = re.findall(r"\d+_", csv_name)[0][:-1]
+            begin_idx = re.findall(r"_\d+", csv_name)[0][1:]
+            end_idx = re.findall(r"-\d+", csv_name)[0][1:]
+            #
+            vox_256_dict[
+                f"{self.base_dir}/"
+                + f"parts_{part_group}, files {begin_idx} through {end_idx}/"
+                + f"Binvox_files_default_res/{d[0][:-4]}.binvox"
+            ] = d[1]
+            stl_dict[
+                f"{self.base_dir}/"
+                + f"parts_{part_group}, files {begin_idx} through {end_idx}/"
+                + f"rotated_files/{d[0]}"
+            ] = d[1]
+            if len(d[0][:-4].split(r".stl")) > 1:
+                vox_64_dict[
+                    f"{self.base_dir}/"
+                    + f"(64) parts_{part_group}, files {begin_idx} through {end_idx}/"
+                    + d[0][:-4].split(r".stl")[0]
+                    + "_compressed."
+                    + d[0][:-4].split(r".")[1]
+                    + ".binvox"
+                ] = d[1]
+            else:
+                vox_64_dict[
+                    f"{self.base_dir}/"
+                    + f"(64) parts_{part_group}, files {begin_idx} through {end_idx}/"
+                    + d[0][:-4].split(r".stl")[0]
+                    + "_compressed.binvox"
+                ] = d[1]
+        return vox_256_dict, stl_dict, vox_64_dict
