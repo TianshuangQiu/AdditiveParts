@@ -14,14 +14,14 @@ class JsonMaker:
     def make_json(self, output_path):
         # get all csv's
         files = [
-            f
+            os.path.join(self.csv_dir, f)
             for f in os.listdir(self.csv_dir)
-            if os.path.isfile(os.join(self.csv_dir, f) and f.endswith(".csv"))
+            if os.path.isfile(os.path.join(self.csv_dir, f)) and f.endswith(".csv")
         ]
-        # data_array = process_map(self._json_helper, files)
-        data_array = []
-        for f in files:
-            data_array.append(self._json_helper(f))
+        data_array = process_map(self._json_helper, files)
+        # data_array = []
+        # for f in files:
+        #     data_array.append(self._json_helper(f))
 
         vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
         for d in data_array:
@@ -33,9 +33,9 @@ class JsonMaker:
             json.dump(vox_256_dict, w)
         with open(f"{output_path}/stl.json", "w") as w:
             json.dump(stl_dict, w)
-        # with open(f"{output_path}/vox_64.json", "w") as w:
-        #     json.dump(vox_64_dict, w)
-        return vox_256_dict, stl_dict
+        with open(f"{output_path}/vox_64.json", "w") as w:
+            json.dump(vox_64_dict, w)
+        return vox_256_dict, stl_dict, vox_64_dict
 
     def _json_helper(self, csv_path):
         with open(csv_path, newline="") as csvfile:
@@ -46,13 +46,13 @@ class JsonMaker:
             # part_group = re.findall(r"\d+_", csv_name)[0][:-1]
             # begin_idx = re.findall(r"_\d+", csv_name)[0][1:]
             # end_idx = re.findall(r"-\d+", csv_name)[0][1:]
-            vox_path = (
+            vox_256_path = (
                 f"{self.base_dir}/" + f"Binvox_files_default_res/{d[0][:-4]}.binvox"
             )
             stl_path = f"{self.base_dir}/" + f"rotated_files/{d[0]}"
 
-            if os.path.isfile(vox_path):
-                vox_256_dict[vox_path] = d[1]
+            if os.path.isfile(vox_256_path):
+                vox_256_dict[vox_256_path] = d[1]
             if os.path.isfile(stl_path):
                 stl_dict[stl_path] = d[1]
             # if len(d[0][:-4].split(r".stl")) > 1:
@@ -71,5 +71,4 @@ class JsonMaker:
             #         + d[0][:-4].split(r".stl")[0]
             #         + "_compressed.binvox"
             #     ] = d[1]
-            pdb.set_trace()
         return vox_256_dict, stl_dict, vox_64_dict
