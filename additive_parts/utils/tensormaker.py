@@ -11,4 +11,4 @@ parser.add_argument("norms_tensor", help="path to store tensor fo norms")
 args = parser.parse_args()
 
 j = JsonMaker(args.base_dir, args.csv_dir)
-vox_256, stl = j.make_json(args.json_dir)
+vox_256, stl, vox_64 = j.make_json(args.json_dir)
