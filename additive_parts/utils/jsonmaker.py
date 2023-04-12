@@ -16,7 +16,7 @@ class JsonMaker:
         files = [
             f
             for f in os.listdir(self.csv_dir)
-            if os.isfile(os.join(self.csv_dir, f) and f.endswith(".csv"))
+            if os.path.isfile(os.join(self.csv_dir, f) and f.endswith(".csv"))
         ]
         # data_array = process_map(self._json_helper, files)
         data_array = []
@@ -33,14 +33,15 @@ class JsonMaker:
             json.dump(vox_256_dict, w)
         with open(f"{output_path}/stl.json", "w") as w:
             json.dump(stl_dict, w)
-        with open(f"{output_path}/vox_64.json", "w") as w:
-            json.dump(vox_64_dict, w)
+        # with open(f"{output_path}/vox_64.json", "w") as w:
+        #     json.dump(vox_64_dict, w)
+        return vox_256_dict, stl_dict
 
     def _json_helper(self, csv_path):
         with open(csv_path, newline="") as csvfile:
             data = list(csv.reader(csvfile))
         vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
-        for i, d in enumerate(data):
+        for d in data:
             # csv_name = csv_path.split(os.sep)[-1][:-4]
             # part_group = re.findall(r"\d+_", csv_name)[0][:-1]
             # begin_idx = re.findall(r"_\d+", csv_name)[0][1:]
