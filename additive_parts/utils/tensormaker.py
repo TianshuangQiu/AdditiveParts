@@ -22,10 +22,8 @@ def make_tensor(stl_path):
     name = stl_path.split("/")[-1]
     cloud = point_cloudify(stl_path, 10000)
     norms = seven_dim_extraction(stl_path)
-    with open(os.path.join(cloud_path, name), "w") as w:
-        torch.save(torch.from_numpy(cloud), w)
-    with open(os.path.join(norm_path, name), "w") as w:
-        torch.save(torch.from_numpy(norms), w)
+    torch.save(torch.from_numpy(cloud), os.path.join(cloud_path, name))
+    torch.save(torch.from_numpy(norms), os.path.join(norm_path, name))
 
     return (
         {os.path.join(cloud_path, name): d[stl_path]},
@@ -41,14 +39,14 @@ norm_path = os.path.join(args.base_dir, "norm")
 os.makedirs(cloud_path, exist_ok=True)
 os.makedirs(norm_path, exist_ok=True)
 
-out_paths = process_map(make_tensor, d.keys())
+out_paths = process_map(make_tensor, d.keys(), chunk_size=62500)
 cloud_dict = {}
 norms_dict = {}
 for o in out_paths:
     cloud_dict.update(o[0])
     norms_dict.update(o[1])
 
-with open("cloud.json", "w") as w:
+with open(os.path.join(args.base_dir, "cloud.json"), "w") as w:
     json.dump(cloud_dict, w)
-with open("norms.json", "w") as w:
+with open(os.path.join(args.base_dir, "norm.json"), "w") as w:
     json.dump(norms_dict, w)
