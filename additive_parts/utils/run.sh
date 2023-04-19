@@ -9,7 +9,7 @@
 #SBATCH --partition=savio2_bigmem
 #
 # Wall clock limit:
-#SBATCH --time=5:00:00
+#SBATCH --time=10:00:00
 #
 #SBATCH --cpus-per-task=16
 #SBATCH --nodes=1
