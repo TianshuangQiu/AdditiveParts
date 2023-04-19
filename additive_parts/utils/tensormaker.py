@@ -7,14 +7,18 @@ from jsonmaker import JsonMaker
 from tqdm.contrib.concurrent import process_map
 
 parser = argparse.ArgumentParser()
-parser.add_argument("csv_dir", help="csv base folder", default="")
+parser.add_argument("csv_dir", nargs="?", help="csv base folder", default="")
 parser.add_argument(
     "json_dir",
+    nargs="?",
     help="json output path",
     default="/global/scratch/users/ethantqiu/Data/stl.json",
 )
 parser.add_argument(
-    "base_dir", help="base directory", default="/global/scratch/users/ethantqiu/Data"
+    "base_dir",
+    nargs="?",
+    help="base directory",
+    default="/global/scratch/users/ethantqiu/Data",
 )
 args = parser.parse_args()
 

@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # Job name:
 SBATCH --job-name=pointcloudify
 #
@@ -9,7 +9,7 @@ SBATCH --account=fc_caddatabase
 #SBATCH --partition=savio2_bigmem
 #
 # Wall clock limit:
-SBATCH --time=0:30:30
+SBATCH --time=2:00:00
 #
 SBATCH --cpus-per-task=8
 #SBATCH --nodes=1
