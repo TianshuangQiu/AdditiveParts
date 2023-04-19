@@ -47,7 +47,7 @@ norm_path = os.path.join(args.base_dir, "norm")
 os.makedirs(cloud_path, exist_ok=True)
 os.makedirs(norm_path, exist_ok=True)
 
-out_paths = process_map(make_tensor, d.keys(), chunksize=62500)
+out_paths = process_map(make_tensor, d.keys(), chunksize=31250)
 cloud_dict = {}
 norms_dict = {}
 for o in out_paths:

@@ -1,17 +1,17 @@
 #!/bin/bash
 # Job name:
-SBATCH --job-name=pointcloudify
+#SBATCH --job-name=pointcloudify
 #
 # Account:
-SBATCH --account=fc_caddatabase
+#SBATCH --account=fc_caddatabase
 #
 # Partition:
 #SBATCH --partition=savio2_bigmem
 #
 # Wall clock limit:
-SBATCH --time=2:00:00
+#SBATCH --time=5:00:00
 #
-SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=16
 #SBATCH --nodes=1
 #
 # Number of tasks (one for each GPU desired for use case) (example):
