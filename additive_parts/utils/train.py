@@ -39,8 +39,9 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("json_dir", help="json output path")
-parser.add_argument("--test", action="store_false")
+parser.add_argument("--test", action="store_true")
 args = parser.parse_args()
+
 model_type = None
 if "cloud" in args.json_dir:
     model = PointCloudProcessor(3, 64, 8, 64, True, [64, 32], device=DEVICE)
