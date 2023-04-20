@@ -1,31 +1,30 @@
 #!/bin/bash
 # Job name:
-#SBATCH --job-name=pointcloudify
+#SBATCH --job-name=test_train
 #
 # Account:
 #SBATCH --account=fc_caddatabase
 #
 # Partition:
-#SBATCH --partition=savio2_bigmem
+#SBATCH --partition=savio3_gpu
 #
 # Wall clock limit:
-#SBATCH --time=10:00:00
+#SBATCH --time=5:00:00
 #
-#SBATCH --cpus-per-task=16
 #SBATCH --nodes=1
 #
 # Number of tasks (one for each GPU desired for use case) (example):
 #SBATCH --ntasks=1
 
 module load python 3.8
+#module load keras
 pip install --user -r /global/home/users/ethantqiu/AdditiveParts/requirements.txt
-#pip install --user keras
 # module load ml/tensorflow
 #module list
-#module load cuda/9.0
+module load cuda/9.0
 #module load cuda/9.0/cudnn/7.1
-#module load cuda
+module load cuda
 #module --ignore_cache load
 ## Command(s) to run:
 #python tester.py >& tester.out
-python3 utils/tensormaker.py
+python3 additive_parts/utils/tensormaker.py
