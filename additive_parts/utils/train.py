@@ -88,7 +88,6 @@ def train(model, optimizer, criterion, epochs, seed):
     eval_losses = []
     step = [0, 0]
     for epoch in range(epochs):
-        random.seed(seed + epoch)
         np.random.seed(seed + epoch)
         torch.manual_seed(seed + epoch)
         for idx, data, labels in tqdm(enumerate(trainloader)):
