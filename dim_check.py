@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 
 torch.manual_seed(0)
-p = PointCloudProcessor(3, 8, 1, 128, True, [16, 16])
-rand = torch.rand((10, 10, 24), requires_grad=True)
+p = PointCloudProcessor(7, 8, 1, 128, True, [16, 16])
+rand = torch.rand((10, 10, 7), requires_grad=True)
 out = p(rand)
 print(out.shape)
 loss = nn.MSELoss()(out, torch.zeros_like(out))
