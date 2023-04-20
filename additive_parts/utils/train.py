@@ -21,7 +21,7 @@ class JsonDataset(Dataset):
     def __getitem__(self, index):
         entry = self.files[index]
         path = entry[0]
-        value = np.float(entry[1])
+        value = float(entry[1])
         data = torch.load(path)
         # Crop so label is greater than 10
         return data, np.min([value, 10])
@@ -86,11 +86,12 @@ def train(model, optimizer, criterion, epochs, seed):
     model.train()
     train_losses = []
     eval_losses = []
-    step = [0, 0]
+    length = [len(trainloader) // BATCH_SIZE, len(testloader) // BATCH_SIZE]
     for epoch in range(epochs):
         np.random.seed(seed + epoch)
         torch.manual_seed(seed + epoch)
-        for idx, data, labels in tqdm(enumerate(trainloader)):
+        for idx, (data, labels) in tqdm(enumerate(trainloader)):
+            print(f"working on batch {idx}")
             output = model.to(DEVICE)(data.to(DEVICE))
             loss = criterion(output, labels.to(DEVICE))
             train_losses.append(loss.item())
@@ -98,17 +99,20 @@ def train(model, optimizer, criterion, epochs, seed):
             loss.backward()
             optimizer.step()
 
-            wandb.log({"loss"})
-
-            step[0] += 1
+            wandb.log({"train_loss": torch.norm(loss)}, step=epoch * length[0] + idx)
 
         with torch.no_grad():
-            for idx, data, labels in tqdm(enumerate(trainloader)):
+            for idx, data, labels in tqdm(enumerate(testloader)):
                 output = model.to(DEVICE)(data.to(DEVICE))
                 loss = criterion(output, labels.to(DEVICE))
                 eval_losses.append(loss.item())
+                wandb.log(
+                    {"validation_loss": torch.norm(loss)},
+                    step=epoch * length[0] + int(idx / length[1] * length[0]),
+                )
 
         torch.save(model.state_dict(), os.path.join(save_path, datetime.now() + ".sav"))
 
 
+wandb.watch(model)
 train(model, optimizer, torch.nn.MSELoss, EPOCH, SEED)
