@@ -1,130 +1,110 @@
 import torch
+import wandb
+import os
 from torch import random
 from torch.utils.data.dataloader import DataLoader, Dataset
+from torch.utils.data import random_split
 import numpy as np
 from tqdm import tqdm
-from models.cloud import PointCloudProcessor
+from additive_parts.models.cloud import PointCloudProcessor
 import json
 import argparse
+from datetime import datetime
+
+
+class JsonDataset(Dataset):
+    def __init__(self, dict_path):
+        with open(dict_path, "r") as r:
+            dictionary = json.load(r)
+        self.files = np.array(list(dictionary.items()))
+
+    def __getitem__(self, index):
+        entry = self.files[index]
+        path = entry[0]
+        value = np.float(entry[1])
+        data = torch.load(path)
+        # Crop so label is greater than 10
+        return data, np.min(value, 10)
+
+    def __len__(self):
+        return self.files.shape[0]
+
 
 EPOCH = 20
 LR = 0.01
-device = "cuda"
-model = PointCloudProcessor(3, 64, 8, 64, True, [64, 32], device=device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001, momentum=0.9)
+BATCH_SIZE = 512
+SEED = 0
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument("csv_dir", help="csv base folder")
 parser.add_argument("json_dir", help="json output path")
-parser.add_argument("base_dir", help="base directory")
-parser.add_argument("cloud_tensor", help="path to store tensor for point clouds")
-parser.add_argument("norms_tensor", help="path to store tensor fo norms")
+parser.add_argument("--test", action="store_false")
 args = parser.parse_args()
+model_type = None
+if "cloud" in args.json_dir:
+    model = PointCloudProcessor(3, 64, 8, 64, True, [64, 32], device=DEVICE)
+    model_type = "Point cloud transformer"
+elif "norm" in args.json_dir:
+    model = PointCloudProcessor(7, 64, 8, 64, True, [64, 32], device=DEVICE)
+    model_type = "Seven dim representation transformer"
+else:
+    raise NotImplementedError("Unknown model")
 
-trainloader = DataLoader()
-proto_dataset = json.load()
+if args.test:
+    model_type = "TEST RUN"
+optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+
+wandb.login(key="ddb6406253b10bb52a73e1c61e24a54994725c96")
+wandb.init(
+    # set the wandb project where this run will be logged
+    project="additive-parts",
+    # track hyperparameters and run metadata
+    config={
+        "learning_rate": LR,
+        "architecture": model_type,
+        "epochs": EPOCH,
+    },
+)
+
+save_path = os.path.join("/global/scratch/users/ethantqiu/models", args.model_type)
+os.makedirs(save_path, exist_ok=True)
+
+full_dataset = JsonDataset(args.json_dir)
+train_dataset, test_dataset = random_split(full_dataset, [0.8, 0.2])
+trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+testloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 
-def build_batch(dataset, indices):
-    """
-    Helper function for creating a batch during training. Builds a batch
-    of source and target elements from the dataset. See the next cell for
-    when and how it's used.
-
-    Arguments:
-        dataset: List[db_element] -- A list of dataset elements
-        indices: List[int] -- A list of indices of the dataset to sample
-    Returns:
-        batch_input: List[List[int]] -- List of tensorized names
-        batch_target: List[int] -- List of numerical categories
-        batch_indices: List[int] -- List of starting indices of padding
-    """
-    # Recover what the entries for the batch are
-    batch = [dataset[i] for i in indices]
-    batch_input = np.array(list(zip(*batch))[0])
-    batch_target = np.array(list(zip(*batch))[1])
-    batch_indices = np.array(list(zip(*batch))[2])
-    return batch_input, batch_target, batch_indices  # lines, categories
-
-
-def train(model, optimizer, criterion, epochs, batch_size, seed):
-    model.to(device)
+def train(model, optimizer, criterion, epochs, seed):
+    model.to(DEVICE)
     model.train()
     train_losses = []
-    train_accuracies = []
-    eval_accuracies = []
+    eval_losses = []
+    step = [0, 0]
     for epoch in range(epochs):
         random.seed(seed + epoch)
         np.random.seed(seed + epoch)
         torch.manual_seed(seed + epoch)
-        indices = np.random.permutation(range(len(train_data)))
-        n_correct, n_total = 0, 0
-        progress_bar = tqdm(range(0, (len(train_data) // batch_size) + 1))
-        for i in progress_bar:
-            batch = build_batch(
-                train_data, indices[i * batch_size : (i + 1) * batch_size]
-            )
-            (batch_input, batch_target, batch_indices) = batch_to_torch(*batch)
-            (batch_input, batch_target, batch_indices) = list_to_device(
-                (batch_input, batch_target, batch_indices)
-            )
-
-            logits = model(batch_input, batch_indices)
-            loss = criterion(logits, batch_target)
+        for idx, data, labels in tqdm(enumerate(trainloader)):
+            output = model.to(DEVICE)(data.to(DEVICE))
+            loss = criterion(output, labels.to(DEVICE))
             train_losses.append(loss.item())
-
-            predictions = logits.argmax(dim=-1)
-            n_correct += (predictions == batch_target).sum().item()
-            n_total += batch_target.size(0)
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            if (i + 1) % 10 == 0:
-                progress_bar.set_description(
-                    f"Epoch: {epoch}  Iteration: {i}  Loss: {np.mean(train_losses[-10:])}"
-                )
-        train_accuracies.append(n_correct / n_total * 100)
-        print(f"Epoch: {epoch}  Train Accuracy: {n_correct / n_total * 100}")
+            wandb.log({"loss"})
+
+            step[0] += 1
 
         with torch.no_grad():
-            indices = list(range(len(test_data)))
-            n_correct, n_total = 0, 0
-            for i in range(0, (len(test_data) // batch_size) + 1):
-                batch = build_batch(
-                    test_data, indices[i * batch_size : (i + 1) * batch_size]
-                )
-                (batch_input, batch_target, batch_indices) = batch_to_torch(*batch)
-                (batch_input, batch_target, batch_indices) = list_to_device(
-                    (batch_input, batch_target, batch_indices)
-                )
+            for idx, data, labels in tqdm(enumerate(trainloader)):
+                output = model.to(DEVICE)(data.to(DEVICE))
+                loss = criterion(output, labels.to(DEVICE))
+                eval_losses.append(loss.item())
 
-                logits = model(batch_input, batch_indices)
-                predictions = logits.argmax(dim=-1)
-                n_correct += (predictions == batch_target).sum().item()
-                n_total += batch_target.size(0)
-            eval_accuracies.append(n_correct / n_total * 100)
-            print(f"Epoch: {epoch}  Eval Accuracy: {n_correct / n_total * 100}")
+        torch.save(model.state_dict(), os.path.join(save_path, datetime.now() + ".sav"))
 
-    to_save = {
-        "history": {
-            "train_losses": train_losses,
-            "train_accuracies": train_accuracies,
-            "eval_accuracies": eval_accuracies,
-        },
-        "hparams": {
-            "hidden_size": hidden_size,
-            "num_layers": num_layers,
-            "dropout": dropout,
-            "optimizer_class": optimizer_class.__name__,
-            "lr": lr,
-            "batch_size": batch_size,
-            "epochs": epochs,
-            "seed": seed,
-        },
-        "model": [
-            (name, list(param.shape)) for name, param in rnn_model.named_parameters()
-        ],
-    }
-    return to_save
+
+train(model, optimizer, torch.nn.MSELoss, EPOCH, SEED)
