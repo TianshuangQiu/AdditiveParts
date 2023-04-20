@@ -24,7 +24,7 @@ class JsonDataset(Dataset):
         value = np.float(entry[1])
         data = torch.load(path)
         # Crop so label is greater than 10
-        return data, np.min(value, 10)
+        return data, np.min([value, 10])
 
     def __len__(self):
         return self.files.shape[0]
