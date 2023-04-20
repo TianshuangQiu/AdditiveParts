@@ -26,7 +26,7 @@ class JsonDataset(Dataset):
             value = 10
         data = torch.load(path)
         # Crop so label is greater than 10
-        return data, torch.double(value)
+        return data, torch.tensor(value).double()
 
     def __len__(self):
         return self.files.shape[0]
