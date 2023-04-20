@@ -53,8 +53,12 @@ else:
 
 if args.test:
     model_type = "TEST RUN"
+if not args.test and DEVICE == "cpu":
+    raise ValueError("cuda is not available")
+
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
+# Plz don't use maliciously :(
 wandb.login(key="ddb6406253b10bb52a73e1c61e24a54994725c96")
 wandb.init(
     # set the wandb project where this run will be logged
@@ -67,7 +71,7 @@ wandb.init(
     },
 )
 
-save_path = os.path.join("/global/scratch/users/ethantqiu/models", args.model_type)
+save_path = os.path.join("/global/scratch/users/ethantqiu/models", model_type)
 os.makedirs(save_path, exist_ok=True)
 
 full_dataset = JsonDataset(args.json_dir)
