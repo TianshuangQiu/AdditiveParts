@@ -23,7 +23,7 @@ class PointCloudProcessor(nn.Module):
             device=device,
             batch_first=batch_first,
         )
-        self.encoder = nn.TransformerEncoder(self.encoder_layer, nhead)
+        self.encoder = nn.TransformerEncoder(self.encoder_layer, nlayer)
         self.post_process = nn.Sequential()
         for i, l in enumerate(linear_layers):
             if i == 0:
