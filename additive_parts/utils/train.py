@@ -22,9 +22,11 @@ class JsonDataset(Dataset):
         entry = self.files[index]
         path = entry[0]
         value = float(entry[1])
+        if value > 10:
+            value = 10
         data = torch.load(path)
         # Crop so label is greater than 10
-        return data, np.min([value, 10])
+        return data, torch.double(value)
 
     def __len__(self):
         return self.files.shape[0]
