@@ -26,15 +26,15 @@ class JsonDataset(Dataset):
             value = 10
         data = torch.load(path)
         # Crop so label is greater than 10
-        return data, torch.tensor(value).double()
+        return data.float(), torch.tensor(value).double()
 
     def __len__(self):
         return self.files.shape[0]
 
 
 EPOCH = 20
-LR = 0.01
-BATCH_SIZE = 512
+LR = 0.001
+BATCH_SIZE = 128
 SEED = 0
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

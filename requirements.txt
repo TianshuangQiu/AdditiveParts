@@ -6,3 +6,4 @@ torch
 torch-vision
 tqdm
 trimesh
+wandb
