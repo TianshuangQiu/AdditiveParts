@@ -27,4 +27,4 @@ module load cuda
 #module --ignore_cache load
 ## Command(s) to run:
 #python tester.py >& tester.out
-python3 additive_parts/utils/tensormaker.py
+python3 additive_parts/utils/train.py /global/scratch/users/ethantqiu/Data/cloud.json --test
