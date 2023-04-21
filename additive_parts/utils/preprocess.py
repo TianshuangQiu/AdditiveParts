@@ -29,5 +29,12 @@ def seven_dim_extraction(mesh_path):
     largest_dist = np.max(np.linalg.norm(mesh.vertices, axis=1))
     centers = mesh.triangles_center / largest_dist
     sizes = mesh.area_faces.reshape((-1, 1)) / (largest_dist**2)
-    # pdb.set_trace()
-    return np.hstack([centers, normals, sizes])
+    out = np.hstack([centers, normals, sizes])
+    if out.shape[0] >= 512:
+        out = out[out[:, -1].argsort()[::-1]]
+        out = out[:512], np.zeros(512, dtype=bool)
+    elif out.shape[0] < 512:
+        mask = np.hstack([np.zeros(out.shape[0]), np.ones(512 - out.shape[0])])
+        out = np.vstack([out, np.zeros((512 - out.shape[0], 7))])
+        out = out, mask
+    return out

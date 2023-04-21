@@ -136,3 +136,4 @@ dmypy.json
 *.obj 
 
 wandb
+.vscode/settings.json

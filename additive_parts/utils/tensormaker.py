@@ -27,12 +27,15 @@ args = parser.parse_args()
 
 
 def make_tensor(stl_path):
+    global max_face
     name = stl_path.split("/")[-1]
-    cloud = point_cloudify(stl_path, 10000)
+    cloud = point_cloudify(stl_path, 4096)
     norms = seven_dim_extraction(stl_path)
     torch.save(torch.from_numpy(cloud), os.path.join(cloud_path, name))
-    torch.save(torch.from_numpy(norms), os.path.join(norm_path, name))
-
+    torch.save(
+        (torch.from_numpy(norms[0]), torch.from_numpy(norms[1])),
+        os.path.join(norm_path, name),
+    )
     return (
         {os.path.join(cloud_path, name): d[stl_path]},
         {os.path.join(norm_path, name): d[stl_path]},
@@ -47,7 +50,9 @@ norm_path = os.path.join(args.base_dir, "norm")
 os.makedirs(cloud_path, exist_ok=True)
 os.makedirs(norm_path, exist_ok=True)
 
-out_paths = process_map(make_tensor, d.keys(), chunksize=31250)
+out_paths = process_map(make_tensor, d.keys(), chunksize=3000)
+# for k in d.keys():
+#     make_tensor(k)
 cloud_dict = {}
 norms_dict = {}
 for o in out_paths:

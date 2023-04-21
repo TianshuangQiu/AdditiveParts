@@ -38,6 +38,8 @@ class PointCloudProcessor(nn.Module):
                 self.post_process.append(nn.Linear(linear_layers[i - 1], l))
                 self.post_process.append(nn.ReLU())
 
+        self.float()
+
     def forward(self, tensors, src_key_padding=None):
         # out = self.encoder_layer(tensors, src_key_padding_mask=src_key_padding)
         out = self.encoder(
