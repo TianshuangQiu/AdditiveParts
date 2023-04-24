@@ -10,9 +10,18 @@ def trimesh_score_src(filepath):
         tmesh = trimesh.load_mesh(filepath, file_type = 'stl')
         dict =  trimesh.poses.compute_stable_poses(tmesh, sigma=0, n_samples=1, threshold = 0.0)
         pose = dict[0][0]
-        identity = np.identity(4)
-        score = np.linalg.norm(np.subtract(identity, pose))
+        pose = np.delete(pose, 3, 0)
+        rotation = np.delete(pose, 3, 1)
+        identity = np.identity(3)
+        score = np.linalg.norm(np.subtract(identity, rotation))
         return score
     except:
-	pass
-	return -98
+	    pass
+	    return -98
+    
+def trimesh_score(filepath):
+    try:
+        return func_timeout.func_timeout(2, trimesh_score_src, args = (filepath,))
+    except func_timeout.FunctionTimedOut:
+        pass
+	    return -99
