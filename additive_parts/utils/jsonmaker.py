@@ -40,6 +40,7 @@ class JsonMaker:
     def _json_helper(self, csv_path):
         with open(csv_path, newline="") as csvfile:
             data = list(csv.reader(csvfile))
+        print(csv_path)
         vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
         for d in data:
             # csv_name = csv_path.split(os.sep)[-1][:-4]
