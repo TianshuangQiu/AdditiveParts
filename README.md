@@ -13,7 +13,11 @@ This project has 4 components, each finished by a different team member. The par
 3. ```python run_baseline.py```
 
 ## Point Cloud Encoder
-1. Download the zipped files here:
-2. The file structure should be /base/rotated files, and /base/tweaker_score
-3. Run utils/tensormaker.py with the proper arguments. This will go through the meshes and sample points and extract norms
-4. Run utils/train.py with the proper arguments are hyperparameters. Please change the API key so you do not accidentally commit your run to our report. 
+### Downloading the Data:
+Meshes: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
+Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt?usp=sharing
+### Running the Network
+1. Unzip the file and clone the repositories
+2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
+3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will go through the meshes and sample points and extract norms
+4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report. 
