@@ -25,6 +25,7 @@ class CloudDataset(Dataset):
         path = entry[0]
         value = float(entry[1])
         value = np.log(value) / 6
+        # value = [1, 0] if value <= 2 else [0, 1]
         data = torch.load(path)
         # Crop so label is greater than 10
         return data.float(), torch.tensor(value).float()
@@ -54,21 +55,21 @@ class NormDataset(Dataset):
         return self.files.shape[0]
 
 
-EPOCH = 5
+EPOCH = 10
 LR = 0.01
 BATCH_SIZE = 8
-SEED = 0
+SEED = 69420
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LOSS = torch.nn.L1Loss()
-NUM_ATTN = 2
-NUM_LAYER = 2
+NUM_ATTN = 1
+NUM_LAYER = 1
 ABLATION = None
 if DEVICE == "cuda":
     print("emptying cache")
     torch.cuda.empty_cache()
     print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-output_loss = torch.nn.CrossEntropyLoss()
+output_loss = torch.nn.L1Loss()
 parser = argparse.ArgumentParser()
 parser.add_argument("json_dir", help="json output path")
 parser.add_argument("--test", action="store_true")
@@ -77,7 +78,7 @@ args = parser.parse_args()
 model_type = None
 data_type = None
 if "cloud" in args.json_dir:
-    model = PointCloudProcessor(3, NUM_ATTN, NUM_LAYER, 4, True, [8, 4], device=DEVICE)
+    model = PointCloudProcessor(3, NUM_ATTN, NUM_LAYER, 8, True, [8, 4], device=DEVICE)
     model_type = "Point-cloud-transformer"
 elif "semi" in args.json_dir:
     model = PointCloudProcessor(
@@ -110,7 +111,6 @@ if not args.test and DEVICE == "cpu":
 
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
-# Plz don't use maliciously :(
 wandb.login(key="ddb6406253b10bb52a73e1c61e24a54994725c96")
 wandb.init(
     # set the wandb project where this run will be logged
@@ -152,41 +152,68 @@ def train(model, optimizer, criterion, epochs, seed):
         torch.manual_seed(seed + epoch)
         losses = [[], []]
         # pdb.set_trace()
-        for idx, (data, labels) in enumerate(tqdm(trainloader)):
-            if "norm" in model_type:
-                tensor, mask = data
-                tensor = tensor.to(DEVICE)
-                mask = mask.to(DEVICE)
-                output = model(tensor, src_key_padding=mask)
+        correct = 0
+        if epoch == 0:
+            with torch.no_grad():
+                for idx, (data, labels) in enumerate(tqdm(trainloader)):
+                    if "norm" in model_type:
+                        tensor, mask = data
+                        tensor = tensor.to(DEVICE)
+                        mask = mask.to(DEVICE)
+                        output = model(tensor, src_key_padding=mask)
+                    else:
+                        output = model.to(DEVICE)(data.to(DEVICE))
 
-                loss = criterion(
-                    output.float(),
-                    labels.reshape((output.shape[0], -1)).float().to(DEVICE),
-                ).float()
-                optimizer.zero_grad()
-                if epoch > 0:
+                    l = torch.mean(
+                        output_loss(
+                            output.float(),
+                            labels.reshape((output.shape[0], -1)).float().to(DEVICE),
+                        ).float()
+                    )
+                    losses[0].append(l.cpu().detach().numpy())
+                    output = (output.cpu() > 0.5).float()
+                    correct += (output == labels).float().sum() // 2
+                    del l
+        else:
+            for idx, (data, labels) in enumerate(tqdm(trainloader)):
+                if "norm" in model_type:
+                    tensor, mask = data
+                    tensor = tensor.to(DEVICE)
+                    mask = mask.to(DEVICE)
+                    output = model(tensor, src_key_padding=mask)
+                    loss = criterion(
+                        output.float(),
+                        labels.float().to(DEVICE),
+                    ).float()
+                    if idx % 32 == 0:
+                        optimizer.zero_grad()
+                        loss.backward()
+                        optimizer.step()
+                else:
+                    output = model.to(DEVICE)(data.to(DEVICE))
+                    loss = criterion(
+                        output.float(),
+                        labels.reshape((output.shape[0], -1)).float().to(DEVICE),
+                    ).float()
                     loss.backward()
-                    optimizer.step()
-            else:
-                output = model.to(DEVICE)(data.to(DEVICE))
-                loss = criterion(
-                    output.float(),
-                    labels.reshape((output.shape[0], -1)).float().to(DEVICE),
-                ).float()
-                optimizer.zero_grad()
-                if epoch > 0:
-                    loss.backward()
-                    optimizer.step()
+                    if idx % 32 == 1:
+                        optimizer.step()
+                        optimizer.zero_grad()
 
-            l = torch.mean(
-                output_loss(
-                    output.float(),
-                    labels.reshape((output.shape[0], -1)).float().to(DEVICE),
-                ).float()
-            )
-            losses[0].append(l.cpu().detach().numpy())
-            del l
-            del loss
+                l = torch.mean(
+                    output_loss(
+                        output.float(),
+                        labels.reshape((output.shape[0], -1)).float().to(DEVICE),
+                    ).float()
+                )
+                losses[0].append(l.cpu().detach().numpy())
+                output = (output.cpu() > 0.5).float()
+                correct += (output == labels).float().sum() // 2
+                del l
+                del loss
+
+        wandb.log({"train_acc": 100 * correct / len(train_dataset)}, commit=False)
+        correct = 0
         with torch.no_grad():
             for idx, (data, labels) in enumerate(tqdm(testloader)):
                 if "norm" in model_type:
@@ -215,12 +242,14 @@ def train(model, optimizer, criterion, epochs, seed):
                 losses[1].append(l.cpu().detach().numpy())
                 del l
                 del loss
-
+                output = (output.cpu() > 0.5).float()
+                correct += (output == labels).float().sum() // 2
         wandb.log(
             {
                 "epoch": epoch,
                 "train_loss": np.average(losses[0]),
                 "validation_loss": np.average(losses[1]),
+                "validation_acc": 100 * correct / len(test_dataset),
             }
         )
 

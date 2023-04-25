@@ -22,8 +22,10 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# j = JsonMaker(args.base_dir, args.csv_dir)
-# vox_256, stl, vox_64 = j.make_json(args.json_dir)
+j = JsonMaker(args.base_dir, args.csv_dir)
+vox_256, stl, vox_64 = j.make_json(args.json_dir)
+
+args.json_dir = os.path.join(args.json_dir, "stl.json")
 
 
 def make_tensor(stl_path):
