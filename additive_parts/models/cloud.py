@@ -77,9 +77,10 @@ class PointCloudProcessor(nn.Module):
                 self.post_process.append(
                     nn.Linear(self.nhead * self.input_features * 3, l)
                 )
-                # self.post_process.append(nn.ReLU())
+                self.post_process.append(nn.ReLU())
             elif i == len(linear_layers) - 1:
                 self.post_process.append(nn.Linear(linear_layers[i - 1], 1))
+                # self.post_process.append(nn.Softmax(-1))
             else:
                 self.post_process.append(nn.Linear(linear_layers[i - 1], l))
                 self.post_process.append(nn.ReLU())

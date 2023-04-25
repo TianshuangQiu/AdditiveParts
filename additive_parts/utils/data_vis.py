@@ -12,9 +12,9 @@ for k in d.keys():
 
 # arr = np.log(arr) / 6
 arr = np.array(arr)
-arr[arr < 2] = 0
-arr[arr >= 2] = 2
-# arr = np.log(arr)
+# arr[arr < 2] = 0
+# arr[arr >= 2] = 2
+arr = np.log(arr)
 
 
 def loss(x):
@@ -28,8 +28,8 @@ plt.hist(arr)
 norm = np.random.normal(loc=out["x"][0], scale=out["x"][1], size=arr.shape[0])
 print(arr.shape)
 print(norm.shape)
-plt.ylabel("Count (log scale)")
-plt.xlabel("Label Score")
+plt.ylabel("Count")
+plt.xlabel("Label Score (log scale)")
 plt.show()
 plt.hist(norm)
 plt.show()
