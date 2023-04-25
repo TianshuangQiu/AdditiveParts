@@ -111,7 +111,7 @@ if not args.test and DEVICE == "cpu":
 
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
-wandb.login(key="ddb6406253b10bb52a73e1c61e24a54994725c96")
+wandb.login(key="")
 wandb.init(
     # set the wandb project where this run will be logged
     project="additive-parts",
