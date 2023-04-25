@@ -4,6 +4,13 @@ UC Berkeley EECS282 Project
 ## Overview
 This project has 4 components, each finished by a different team member. The parts are: baseline, 3D CNN, Mesh CNN, and pointcloud encoder. For the baseline and pointcloud computations, the instructions are outlined in this document. For 3D CNN and Mesh CNN, their respective README's are in their folders.
 
+Additional hyperparameter tuning and discussion can be found at the following links:
+
+https://wandb.ai/additive-parts/additive-parts/reports/Point-Cloud-Encoder-Regression---Vmlldzo0MTQ5MTU4
+
+https://wandb.ai/additive-parts/additive-parts/reports/Point-Cloud-Encoder-Classification---Vmlldzo0MTY3OTA1
+
+
 ## Baseline
 ### To Install Original Printability Scores:
 1. Download the .json file from the following link:https://drive.google.com/drive/folders/1ZDbtCF1YcgrH9zyQXbL-eH95N4o1lIvK?usp=sharing
@@ -15,6 +22,7 @@ This project has 4 components, each finished by a different team member. The par
 ## Point Cloud Encoder
 ### Downloading the Data:
 Meshes: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
+
 Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt?usp=sharing
 ### Running the Network
 1. Unzip the file and clone the repositories
