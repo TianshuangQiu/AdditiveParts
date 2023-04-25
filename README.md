@@ -7,4 +7,4 @@ UC Berkeley EECS282 Project
 ### To Run
 1. Change filepath at line 7 to filepath of downloaded .json file
 2. Change filepath at line 10 to target filepath of result file
-```python run_baseline.py```
+3. ```python run_baseline.py```
