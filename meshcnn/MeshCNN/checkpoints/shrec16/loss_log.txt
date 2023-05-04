@@ -1,0 +1,85 @@
+================ Training Loss (Tue Apr 18 14:49:08 2023) ================
+(epoch: 1, iters: 80, time: 0.197, data: 1.154) loss: 3.420 
+(epoch: 1, iters: 160, time: 0.201, data: 0.000) loss: 3.403 
+(epoch: 1, iters: 240, time: 0.199, data: 0.006) loss: 3.408 
+(epoch: 1, iters: 320, time: 0.199, data: 0.004) loss: 3.413 
+(epoch: 1, iters: 400, time: 0.199, data: 0.000) loss: 3.358 
+(epoch: 1, iters: 480, time: 0.198, data: 0.007) loss: 3.351 
+(epoch: 2, iters: 80, time: 0.200, data: 0.837) loss: 3.411 
+(epoch: 2, iters: 160, time: 0.200, data: 0.004) loss: 3.375 
+(epoch: 2, iters: 240, time: 0.204, data: 0.003) loss: 3.323 
+(epoch: 2, iters: 320, time: 0.197, data: 0.004) loss: 3.343 
+(epoch: 2, iters: 400, time: 0.198, data: 0.003) loss: 3.251 
+(epoch: 2, iters: 480, time: 0.200, data: 0.003) loss: 3.287 
+(epoch: 3, iters: 80, time: 0.198, data: 0.878) loss: 3.284 
+(epoch: 3, iters: 160, time: 0.199, data: 0.000) loss: 3.290 
+(epoch: 3, iters: 240, time: 0.200, data: 0.003) loss: 3.265 
+(epoch: 3, iters: 320, time: 0.199, data: 0.006) loss: 3.266 
+(epoch: 3, iters: 400, time: 0.198, data: 0.000) loss: 3.083 
+================ Training Loss (Tue Apr 18 14:55:02 2023) ================
+(epoch: 1, iters: 80, time: 0.206, data: 0.754) loss: 3.390 
+(epoch: 1, iters: 160, time: 0.201, data: 0.000) loss: 3.376 
+(epoch: 1, iters: 240, time: 0.201, data: 0.004) loss: 3.376 
+(epoch: 1, iters: 320, time: 0.202, data: 0.005) loss: 3.363 
+(epoch: 1, iters: 400, time: 0.198, data: 0.000) loss: 3.374 
+(epoch: 1, iters: 480, time: 0.200, data: 0.003) loss: 3.326 
+(epoch: 2, iters: 80, time: 0.201, data: 0.887) loss: 3.319 
+(epoch: 2, iters: 160, time: 0.202, data: 0.000) loss: 3.295 
+(epoch: 2, iters: 240, time: 0.201, data: 0.003) loss: 3.263 
+(epoch: 2, iters: 320, time: 0.201, data: 0.006) loss: 3.322 
+(epoch: 2, iters: 400, time: 0.203, data: 0.000) loss: 3.311 
+(epoch: 2, iters: 480, time: 0.201, data: 0.003) loss: 3.232 
+(epoch: 3, iters: 80, time: 0.202, data: 0.850) loss: 3.266 
+(epoch: 3, iters: 160, time: 0.202, data: 0.000) loss: 3.159 
+(epoch: 3, iters: 240, time: 0.199, data: 0.000) loss: 3.223 
+(epoch: 3, iters: 320, time: 0.201, data: 0.009) loss: 3.132 
+(epoch: 3, iters: 400, time: 0.199, data: 0.000) loss: 3.155 
+(epoch: 3, iters: 480, time: 0.200, data: 0.000) loss: 3.195 
+(epoch: 4, iters: 80, time: 0.199, data: 0.775) loss: 3.100 
+(epoch: 4, iters: 160, time: 0.199, data: 0.003) loss: 3.095 
+(epoch: 4, iters: 240, time: 0.198, data: 0.003) loss: 2.987 
+(epoch: 4, iters: 320, time: 0.198, data: 0.003) loss: 3.163 
+(epoch: 4, iters: 400, time: 0.200, data: 0.003) loss: 2.953 
+(epoch: 4, iters: 480, time: 0.198, data: 0.004) loss: 3.025 
+(epoch: 5, iters: 80, time: 0.198, data: 0.767) loss: 2.807 
+(epoch: 5, iters: 160, time: 0.199, data: 0.003) loss: 2.700 
+(epoch: 5, iters: 240, time: 0.199, data: 0.003) loss: 2.807 
+(epoch: 5, iters: 320, time: 0.197, data: 0.003) loss: 2.798 
+(epoch: 5, iters: 400, time: 0.197, data: 0.003) loss: 2.941 
+(epoch: 5, iters: 480, time: 0.196, data: 0.003) loss: 2.788 
+(epoch: 6, iters: 80, time: 0.197, data: 0.690) loss: 2.434 
+(epoch: 6, iters: 160, time: 0.195, data: 0.000) loss: 2.708 
+(epoch: 6, iters: 240, time: 0.199, data: 0.006) loss: 2.709 
+(epoch: 6, iters: 320, time: 0.195, data: 0.003) loss: 2.567 
+(epoch: 6, iters: 400, time: 0.195, data: 0.000) loss: 2.690 
+(epoch: 6, iters: 480, time: 0.195, data: 0.005) loss: 2.598 
+(epoch: 7, iters: 80, time: 0.197, data: 0.685) loss: 2.624 
+(epoch: 7, iters: 160, time: 0.196, data: 0.000) loss: 2.537 
+(epoch: 7, iters: 240, time: 0.195, data: 0.003) loss: 2.600 
+(epoch: 7, iters: 320, time: 0.199, data: 0.006) loss: 2.528 
+(epoch: 7, iters: 400, time: 0.196, data: 0.000) loss: 2.600 
+(epoch: 7, iters: 480, time: 0.195, data: 0.003) loss: 2.582 
+(epoch: 8, iters: 80, time: 0.199, data: 0.484) loss: 2.513 
+(epoch: 8, iters: 160, time: 0.196, data: 0.004) loss: 2.474 
+(epoch: 8, iters: 240, time: 0.196, data: 0.000) loss: 2.752 
+(epoch: 8, iters: 320, time: 0.196, data: 0.006) loss: 2.299 
+(epoch: 8, iters: 400, time: 0.195, data: 0.003) loss: 2.349 
+(epoch: 8, iters: 480, time: 0.195, data: 0.000) loss: 2.754 
+================ Training Loss (Tue Apr 18 21:48:25 2023) ================
+================ Training Loss (Tue Apr 18 22:40:44 2023) ================
+================ Training Loss (Tue Apr 18 22:42:01 2023) ================
+================ Training Loss (Tue Apr 18 22:43:19 2023) ================
+================ Training Loss (Tue Apr 18 22:44:06 2023) ================
+================ Training Loss (Tue Apr 18 22:44:18 2023) ================
+================ Training Loss (Wed Apr 19 15:42:44 2023) ================
+================ Training Loss (Wed Apr 19 15:44:41 2023) ================
+================ Training Loss (Wed Apr 19 15:46:12 2023) ================
+================ Training Loss (Wed Apr 19 15:46:44 2023) ================
+(epoch: 1, iters: 80, time: 0.163, data: 0.106) loss: 2.351 
+================ Training Loss (Wed Apr 19 15:48:01 2023) ================
+================ Training Loss (Wed Apr 19 15:49:31 2023) ================
+================ Training Loss (Wed Apr 19 15:50:07 2023) ================
+================ Training Loss (Wed Apr 19 15:50:33 2023) ================
+(epoch: 1, iters: 80, time: 0.086, data: 0.088) loss: 2.296 
+================ Training Loss (Wed Apr 19 15:50:58 2023) ================
+================ Training Loss (Wed Apr 19 15:52:56 2023) ================
