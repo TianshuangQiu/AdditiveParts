@@ -44,4 +44,15 @@ Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt
 1. Unzip the file and clone the repositories
 2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
 3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will go through the meshes and sample points and extract norms
-4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report. 
+4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report.
+
+
+## MeshCNN
+### Downloading the Data:
+Dataset: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
+### Running the Network
+1. Unzip the dataset. Make sure the unzipped folder is named "sdata"
+2. Move the dataset into the ./MeshCNN/dataset/
+3. The filepath to the data should look like ./MeshCNN/dataset/sdata
+4. from the root folder, run `cd ./MeshCNN/MeshCNN/`
+6. Run `bash scripts/keene/test.sh`
