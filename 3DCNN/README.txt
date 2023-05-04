@@ -1,13 +1,9 @@
-Read Me
-1. Data: 
-- Parts1_1-2500.csv files has labels for small example dataset
-- This folder (https://drive.google.com/drive/folders/1j_J4PxkVZlfP7kqhP4JwyUG29bYVLbNJ?usp=sharing) has input parts for small example dataset
-3. Results log:
-- You need wandb account to log results
-- Alternatively could remove wandb parts of code
-4. Running code:
-- open google drive folder: https://drive.google.com/drive/folders/1X9QT3sKSmmZerPh2ROHmtgpmWx4lH-Hx?usp=share_link
-- open one_model_regression, merged_model_regression, or one_model_classification (still a work in progress)
-- check the paths for the Parts1_1-2500.csv file and input parts folder so that they are correct for your gdrive
-- run code
-- see results in wandb
+## 3D CNN
+### Downloading the Data
+Meshes & Labels: https://drive.google.com/file/d/1Ny_H5a0CobkbChiAQMkfG6TdyDIMtKsd/view?usp=sharing
+
+### Running the Network
+1. Upload the 3D CNN notebook files (one_model_regression_once_data_loaded.ipynb, one_model_classification_once_data_loaded.ipynb, and one_model_classification_once_data_loaded_scale.ipynb) to the Google Drive repository you intend to use.
+2. Download the meshes & labels file (link above) and move it to the Google Drive repository you intend to use. Change file path in "Load numpy array" block of code to match where you put the meshes & labels files.
+3. Run any of the 3D CNN notebooks!
+4. Note: you will need a wandB account for the wandB blocks of code to run. If you don't have a wandB account remove these sections of code (Wandb Install, Wandb Imports, Wandb Ininitialization, Finish WandB, and the callbacks in Training Model and Evaluate Model) and the code should still run.
