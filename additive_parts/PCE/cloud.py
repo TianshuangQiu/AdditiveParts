@@ -57,6 +57,7 @@ class PointCloudProcessor(nn.Module):
         batch_first,
         linear_layers,
         device=None,
+        regression=False,
     ):
         super().__init__()
         self.nhead = nhead
@@ -79,8 +80,11 @@ class PointCloudProcessor(nn.Module):
                 )
                 self.post_process.append(nn.ReLU())
             elif i == len(linear_layers) - 1:
-                self.post_process.append(nn.Linear(linear_layers[i - 1], 1))
-                # self.post_process.append(nn.Softmax(-1))
+                if regression:
+                    self.post_process.append(nn.Linear(linear_layers[i - 1], 1))
+                else:
+                    self.post_process.append(nn.Linear(linear_layers[i - 1], 2))
+                    self.post_process.append(nn.Softmax(-1))
             else:
                 self.post_process.append(nn.Linear(linear_layers[i - 1], l))
                 self.post_process.append(nn.ReLU())
