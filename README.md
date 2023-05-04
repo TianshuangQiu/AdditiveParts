@@ -25,17 +25,6 @@ Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt
 4. In `run_baseline.py`, change filepath at line 7 to filepath of created json file, also change filepath at line 10 to target filepath of resulting json file
 6. ```python run_baseline.py```
 
-## Point Cloud Encoder
-### Downloading the Data:
-Meshes: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
-
-Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt?usp=sharing
-### Running the Network
-1. Unzip the file and clone the repositories
-2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
-3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will go through the meshes and sample points and extract norms
-4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report. 
-
 ## 3D CNN
 ### Downloading the Data
 Meshes & Labels: https://drive.google.com/file/d/1Ny_H5a0CobkbChiAQMkfG6TdyDIMtKsd/view?usp=sharing
@@ -46,3 +35,13 @@ Meshes & Labels: https://drive.google.com/file/d/1Ny_H5a0CobkbChiAQMkfG6TdyDIMtK
 3. Run any of the 3D CNN notebooks!
 4. Note: you will need a wandB account for the wandB blocks of code to run. If you don't have a wandB account remove these sections of code (Wandb Install, Wandb Imports, Wandb Ininitialization, Finish WandB, and the callbacks in Training Model and Evaluate Model) and the code should still run.
 
+## Point Cloud Encoder
+### Downloading the Data:
+Meshes: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
+
+Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt?usp=sharing
+### Running the Network
+1. Unzip the file and clone the repositories
+2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
+3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will go through the meshes and sample points and extract norms
+4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report. 
