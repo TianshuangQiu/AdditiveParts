@@ -6,7 +6,7 @@ from torch.utils.data.dataloader import DataLoader, Dataset
 from torch.utils.data import random_split
 import numpy as np
 from tqdm import tqdm
-from additive_parts.models.cloud import PointCloudProcessor
+from additive_parts.PCE.cloud import PointCloudProcessor
 import json
 import argparse
 import math
@@ -24,8 +24,11 @@ class CloudDataset(Dataset):
         entry = self.files[index]
         path = entry[0]
         value = float(entry[1])
-        value = np.log(value) / 6
-        # value = [1, 0] if value <= 2 else [0, 1]
+        # value = np.log(value) / 6
+        if not REGRESSION:
+            value = [1, 0] if value < 5 else [0, 1]
+        elif value > 20:
+            value = 20
         data = torch.load(path)
         # Crop so label is greater than 10
         return data.float(), torch.tensor(value).float()
@@ -46,7 +49,10 @@ class NormDataset(Dataset):
         value = float(entry[1])
         # value = np.log(value) / 6
         # value /= 10
-        value = [1, 0] if value <= 2 else [0, 1]
+        if not REGRESSION:
+            value = [1, 0] if value < 5 else [0, 1]
+        elif value > 20:
+            value = 20
         data = torch.load(path)
 
         return (data[0].float(), data[1].float()), torch.tensor(value).float()
@@ -56,20 +62,22 @@ class NormDataset(Dataset):
 
 
 EPOCH = 10
-LR = 0.01
-BATCH_SIZE = 8
-SEED = 69420
+LR = 0.001
+BATCH_SIZE = 1
+SEED = 0
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LOSS = torch.nn.L1Loss()
-NUM_ATTN = 1
-NUM_LAYER = 1
+NUM_ATTN = 8
+NUM_LAYER = 4
 ABLATION = None
+REGRESSION = True
+
 if DEVICE == "cuda":
     print("emptying cache")
     torch.cuda.empty_cache()
     print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-output_loss = torch.nn.L1Loss()
+output_loss = LOSS
 parser = argparse.ArgumentParser()
 parser.add_argument("json_dir", help="json output path")
 parser.add_argument("--test", action="store_true")
@@ -78,15 +86,19 @@ args = parser.parse_args()
 model_type = None
 data_type = None
 if "cloud" in args.json_dir:
-    model = PointCloudProcessor(3, NUM_ATTN, NUM_LAYER, 8, True, [8, 4], device=DEVICE)
+    model = PointCloudProcessor(
+        3, NUM_ATTN, NUM_LAYER, 8, True, [8, 4], device=DEVICE, regression=REGRESSION
+    )
     model_type = "Point-cloud-transformer"
 elif "semi" in args.json_dir:
     model = PointCloudProcessor(
-        8, NUM_ATTN, NUM_LAYER, 32, True, [32, 16], device=DEVICE
+        8, NUM_ATTN, NUM_LAYER, 32, True, [32, 16], device=DEVICE, regression=REGRESSION
     )
     model_type = "8-Dim-norms-transformer"
 elif "norm" in args.json_dir:
-    model = PointCloudProcessor(7, NUM_ATTN, NUM_LAYER, 8, True, [8, 4], device=DEVICE)
+    model = PointCloudProcessor(
+        7, NUM_ATTN, NUM_LAYER, 8, True, [8, 4], device=DEVICE, regression=REGRESSION
+    )
     model_type = "Face-norms-transformer"
 
 else:
@@ -114,7 +126,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 wandb.login(key="")
 wandb.init(
     # set the wandb project where this run will be logged
-    project="additive-parts",
+    project="synced-parts",
     # track hyperparameters and run metadata
     config={
         "learning_rate": LR,
@@ -129,6 +141,7 @@ wandb.init(
         ),
         "data_type": data_type,
         "ablation": ABLATION,
+        "regression": REGRESSION,
     },
 )
 
@@ -183,20 +196,19 @@ def train(model, optimizer, criterion, epochs, seed):
                     output = model(tensor, src_key_padding=mask)
                     loss = criterion(
                         output.float(),
-                        labels.float().to(DEVICE),
+                        labels.to(DEVICE),
                     ).float()
-                    if idx % 32 == 0:
-                        optimizer.zero_grad()
-                        loss.backward()
-                        optimizer.step()
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
                 else:
                     output = model.to(DEVICE)(data.to(DEVICE))
                     loss = criterion(
                         output.float(),
-                        labels.reshape((output.shape[0], -1)).float().to(DEVICE),
+                        labels.reshape((output.shape[0], -1)).to(DEVICE),
                     ).float()
                     loss.backward()
-                    if idx % 32 == 1:
+                    if idx % 8 == 0:
                         optimizer.step()
                         optimizer.zero_grad()
 
@@ -212,6 +224,7 @@ def train(model, optimizer, criterion, epochs, seed):
                 del l
                 del loss
 
+        print(100 * correct / len(train_dataset))
         wandb.log({"train_acc": 100 * correct / len(train_dataset)}, commit=False)
         correct = 0
         with torch.no_grad():
@@ -244,6 +257,7 @@ def train(model, optimizer, criterion, epochs, seed):
                 del loss
                 output = (output.cpu() > 0.5).float()
                 correct += (output == labels).float().sum() // 2
+        print(100 * correct / len(test_dataset))
         wandb.log(
             {
                 "epoch": epoch,

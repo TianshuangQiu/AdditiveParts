@@ -2,49 +2,37 @@
 UC Berkeley EECS282 Project
 
 ## Overview
-This project has 4 components, each finished by a different team member. The parts are: baseline, 3D CNN, Mesh CNN, and pointcloud encoder. For the baseline, 3D CNN, and pointcloud computations, the instructions are outlined in this document. For 3D CNN and Mesh CNN, their respective README's are in their folders.
+This project has 4 components, each finished by a different team member. The parts are: baseline, 3D CNN, Mesh CNN, and pointcloud encoder. We have streamlined some portions of our process for ease of replicating our results, to test our code for yourself, please check the `run` folder.
 
 Additional hyperparameter tuning and discussion can be found at the following links:
 
-https://wandb.ai/additive-parts/additive-parts/reports/Point-Cloud-Encoder-Regression---Vmlldzo0MTQ5MTU4
+[PCE Regression](https://wandb.ai/additive-parts/synced-parts/reports/Point-Cloud-Encoder-Regression---Vmlldzo0MjY0NDM2?accessToken=xp6jexcql35n2jwbbti9fgutwf1opr130xj5nwka3135wgjhwsb3tbz3362votuq)
 
-https://wandb.ai/additive-parts/additive-parts/reports/Point-Cloud-Encoder-Classification---Vmlldzo0MTY3OTA1
+[PCE Classification](https://wandb.ai/additive-parts/synced-parts/reports/Point-Cloud-Encoder-Classification---Vmlldzo0MjY0MTY4?accessToken=krxx4xcdwttrzf1sz7fdefzc0w4rjf29uug0c52godobod1304w3rj5sh9tmmgun)
+
+## File Structure
+Please download the files from this folder: https://drive.google.com/drive/folders/1jCzhg4bwJk7lqaEBTcfoWZch0BIdxavM?usp=sharing and arrange into the following structure
+```
+BASE_DIR
+├── AdditiveParts
+├── rawcloud
+├── rawcloud.json
+├── rawnorm
+├── rawnorm.json
+├── repaired_files
+```
 
 
 ## Baseline
-### To Install Original Data and Printability Scores:
-Download the dataset from the following links:
-
-Meshes: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
-
-Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt?usp=sharing
-### To Run
-1. Unzip the files and clone the repositories
-2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
-3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will extract the stl filepaths and their corresponding scores into a json file.
-4. In `run_baseline.py`, change filepath at line 7 to filepath of created json file, also change filepath at line 10 to target filepath of resulting json file
-6. ```python run_baseline.py```
-
-## 3D CNN
-### Downloading the Data
-Meshes & Labels: https://drive.google.com/file/d/1Ny_H5a0CobkbChiAQMkfG6TdyDIMtKsd/view?usp=sharing
-
-### Running the Network
-1. Upload the 3D CNN notebook files (one_model_regression_once_data_loaded.ipynb, one_model_classification_once_data_loaded.ipynb, and one_model_classification_once_data_loaded_scale.ipynb) to the Google Drive repository you intend to use.
-2. Download the meshes & labels file (link above) and move it to the Google Drive repository you intend to use. Change file path in "Load numpy array" block of code to match where you put the meshes & labels files.
-3. Run any of the 3D CNN notebooks!
-4. Note: you will need a wandB account for the wandB blocks of code to run. If you don't have a wandB account remove these sections of code (Wandb Install, Wandb Imports, Wandb Ininitialization, Finish WandB, and the callbacks in Training Model and Evaluate Model) and the code should still run.
+### Stable Pose
+1. Change filepath at line 7 to filepath of downloaded .json file
+2. Change filepath at line 10 to target filepath of result file
+3. ```python run_baseline.py```
+### Optimized Normal
+1. Run the `run/normalBaseline.ipynb` notebook
 
 ## Point Cloud Encoder
-### Downloading the Data:
-Meshes: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
-
-Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt?usp=sharing
-### Running the Network
-1. Unzip the file and clone the repositories
-2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
-3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will go through the meshes and sample points and extract norms
-4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report.
+1. Run the `run/trainPCE.ipynb` notebook, it walks through how to run our experiments.
 
 
 ## MeshCNN
@@ -53,6 +41,7 @@ Dataset: [https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst11
 ### Running the Network
 1. Unzip the dataset. Make sure the unzipped folder is named "sdata"
 2. Move the dataset into the ./MeshCNN/dataset/
+3. Clone the manifold repo into ./MeshCNN https://github.com/hjwdzh/Manifold and follow building instructions (train optional)
 3. The filepath to the data should look like ./MeshCNN/dataset/sdata
 4. from the root folder of the repo, run `cd ./MeshCNN/MeshCNN/`
 6. Run `bash scripts/keene/test.sh`

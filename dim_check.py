@@ -1,4 +1,4 @@
-from additive_parts.models.cloud import PointCloudProcessor
+from additive_parts.PCE.cloud import PointCloudProcessor
 import pdb
 import torch
 import torch.nn as nn

@@ -50,7 +50,7 @@ class JsonMaker:
             vox_256_path = (
                 f"{self.base_dir}/" + f"Binvox_files_default_res/{d[0][:-4]}.binvox"
             )
-            stl_path = f"{self.base_dir}/" + f"rotated_files/{d[0]}"
+            stl_path = f"{self.base_dir}/" + f"repaired_files/{d[0]}"
 
             if os.path.isfile(vox_256_path):
                 vox_256_dict[vox_256_path] = d[1]
