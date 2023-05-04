@@ -2,7 +2,7 @@
 UC Berkeley EECS282 Project
 
 ## Overview
-This project has 4 components, each finished by a different team member. The parts are: baseline, 3D CNN, Mesh CNN, and pointcloud encoder. For the baseline and pointcloud computations, the instructions are outlined in this document. For 3D CNN and Mesh CNN, their respective README's are in their folders.
+This project has 4 components, each finished by a different team member. The parts are: baseline, 3D CNN, Mesh CNN, and pointcloud encoder. For the baseline, 3D CNN, and pointcloud computations, the instructions are outlined in this document. For 3D CNN and Mesh CNN, their respective README's are in their folders.
 
 Additional hyperparameter tuning and discussion can be found at the following links:
 
@@ -35,3 +35,14 @@ Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt
 2. The file structure should be `/base/rotated_files`, `/base/tweaker_score`, and `base/AdditiveParts`
 3. Run utils/tensormaker.py specifying the path to your base folder, the rotated_files folder, and the folder for CSVs. This script will go through the meshes and sample points and extract norms
 4. Run utils/train.py with the proper arguments and hyperparameters. Please change the API key so you do not accidentally commit your run to our report. 
+
+## 3D CNN
+### Downloading the Data
+Meshes & Labels: https://drive.google.com/file/d/1Ny_H5a0CobkbChiAQMkfG6TdyDIMtKsd/view?usp=sharing
+
+### Running the Network
+1. Upload the 3D CNN notebook files (one_model_regression_once_data_loaded.ipynb, one_model_classification_once_data_loaded.ipynb, and one_model_classification_once_data_loaded_scale.ipynb) to the Google Drive repository you intend to use.
+2. Download the meshes & labels file (link above) and move it to the Google Drive repository you intend to use. Change file path in "Load numpy array" block of code to match where you put the meshes & labels files.
+3. Run any of the 3D CNN notebooks!
+4. Note: you will need a wandB account for the wandB blocks of code to run. If you don't have a wandB account remove these sections of code (Wandb Install, Wandb Imports, Wandb Ininitialization, Finish WandB, and the callbacks in Training Model and Evaluate Model) and the code should still run.
+
