@@ -15,7 +15,8 @@ import numpy as np
 #                         if (not os.path.isfile(location)):
 #                                 continue
 #                         scores.append(min(100.0, float(value)))c
-with open("./data/merged_data.json", "rb") as f:
+# with open("./data/merged_data.json", "rb") as f:
+with open("./sanitized_dict.json", "rb") as f:
         parser = ijson.parse(f)
         for file in parser:
                 if (file[1] == 'string'):
@@ -28,12 +29,11 @@ with open("./data/merged_data.json", "rb") as f:
 
                         # does train test split
                         
-                        score = float(value)
+                        score = int(float(value)) # round down
                         # we ball, make the classes I guess      
-                        new_dir = str(min(score, 2))
+                        new_dir = "good" if score < 5 else "bad"
                         if (not os.path.exists(os.path.join("./dataset/sdata", new_dir))):
                                 os.mkdir(os.path.join("./dataset/sdata", new_dir))
-                                print("HELLO???")
                                 if (not os.path.exists(os.path.join("./dataset/sdata", new_dir, "test"))):
                                         os.mkdir(os.path.join("./dataset/sdata", new_dir, "test"))
                                         os.mkdir(os.path.join("./dataset/sdata", new_dir, "train"))
