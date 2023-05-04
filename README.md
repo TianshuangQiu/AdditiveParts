@@ -54,5 +54,5 @@ Dataset: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113
 1. Unzip the dataset. Make sure the unzipped folder is named "sdata"
 2. Move the dataset into the ./MeshCNN/dataset/
 3. The filepath to the data should look like ./MeshCNN/dataset/sdata
-4. from the root folder, run `cd ./MeshCNN/MeshCNN/`
+4. from the root folder of the repo, run `cd ./MeshCNN/MeshCNN/`
 6. Run `bash scripts/keene/test.sh`
