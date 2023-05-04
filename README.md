@@ -49,7 +49,7 @@ Labels: https://drive.google.com/drive/folders/1XQ1MZiSwdev-85kfswiY5qveu_y-cWvt
 
 ## MeshCNN
 ### Downloading the Data:
-Dataset: https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?usp=share_link
+Dataset: [https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?](https://drive.google.com/file/d/1yejuhFTWGWXTpzZ6iesxitI513-e14hR/view?usp=sharing)
 ### Running the Network
 1. Unzip the dataset. Make sure the unzipped folder is named "sdata"
 2. Move the dataset into the ./MeshCNN/dataset/
