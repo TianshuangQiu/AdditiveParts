@@ -38,7 +38,8 @@ BASE_DIR
 ## MeshCNN
 ### Downloading the Data:
 Dataset: [https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?](https://drive.google.com/file/d/1yejuhFTWGWXTpzZ6iesxitI513-e14hR/view?usp=sharing)
-### Running the Network (cd into the AdditiveParts folder first)
+### Running the Network
+0. cd into AdditiveParts/additive_parts
 1. Unzip the dataset. Make sure the unzipped folder is named "sdata"
 2. Move the dataset into the ./meshcnn/dataset/
 3. The filepath to the data should look like ./meshcnn/dataset/sdata
