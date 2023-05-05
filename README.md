@@ -43,6 +43,6 @@ Dataset: [https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst11
 2. Move the dataset into the ./meshcnn/dataset/
 3. The filepath to the data should look like ./meshcnn/dataset/sdata
 4. from the root folder of the repo do `cd ./meshcnn/MeshCNN/`
-5. Create a virtual environment using `conda create -n meshcnn python=3.6.8`, activate the virtual environment and run:
-  `pip install -r requirements.txt` inside.  
-6. Run `bash scripts/keene/test.sh` to test
+5. Create a virtual environment using `conda create -n meshcnn python=3.6.8`.
+6. Activate the virtual environment and run `pip install -r requirements.txt` inside of the MeshCNN folder.  
+7. Run `bash scripts/keene/test.sh` to test the pretrained neural network.
