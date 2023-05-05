@@ -20,14 +20,14 @@ BASE_DIR
 ├── rawnorm
 ├── rawnorm.json
 ├── repaired_files
+├── sanitized_dict.json
 ```
 
 
 ## Baseline
 ### Stable Pose
-1. Change filepath at line 7 to filepath of downloaded .json file
-2. Change filepath at line 10 to target filepath of result file
-3. ```python run_baseline.py```
+1. Run the `run/stable_pose_baseline.ipynb` notebook
+
 ### Optimized Normal
 1. Run the `run/normalBaseline.ipynb` notebook
 
