@@ -38,10 +38,10 @@ BASE_DIR
 ## MeshCNN
 ### Downloading the Data:
 Dataset: [https://drive.google.com/drive/folders/1C0MGixYalkqlBkXeAsyGjXVHUfst113t?](https://drive.google.com/file/d/1yejuhFTWGWXTpzZ6iesxitI513-e14hR/view?usp=sharing)
-### Running the Network
+### Running the Network (cd into the AdditiveParts folder first)
 1. Unzip the dataset. Make sure the unzipped folder is named "sdata"
-2. Move the dataset into the ./MeshCNN/dataset/
-3. Clone the manifold repo into ./MeshCNN https://github.com/hjwdzh/Manifold and follow building instructions (train optional)
-3. The filepath to the data should look like ./MeshCNN/dataset/sdata
-4. from the root folder of the repo, run `cd ./MeshCNN/MeshCNN/`
-6. Run `bash scripts/keene/test.sh`
+2. Move the dataset into the ./meshcnn/dataset/
+3. The filepath to the data should look like ./meshcnn/dataset/sdata
+4. from the root folder of the repo do `cd ./meshcnn/MeshCNN/`
+5. Create a virtual environment using `conda create -n meshcnn python=3.6.8`, activate the virtual environment and run `pip install -r requirements.txt` inside.  
+6. Run `bash scripts/keene/test.sh` to test
