@@ -6,6 +6,10 @@ This project has 4 components, each finished by a different team member. The par
 
 Additional hyperparameter tuning and discussion can be found at the following links:
 
+[3D CNN Regression](https://wandb.ai/additive-parts/3D_CNN_printability/reports/Predicing-Unprintability-Score-UPS-via-3D-CNN--Vmlldzo0MjY2ODY4?accessToken=xlrsa7kmgp7hhpob8sqlvgtjpe13jsuxe4syprjj569eh0dik3se9ofbdc4p4j2v)
+
+[3D CNN Classification](https://api.wandb.ai/links/additive-parts/h40r0jxf)
+
 [PCE Regression](https://wandb.ai/additive-parts/synced-parts/reports/Point-Cloud-Encoder-Regression---Vmlldzo0MjY0NDM2?accessToken=xp6jexcql35n2jwbbti9fgutwf1opr130xj5nwka3135wgjhwsb3tbz3362votuq)
 
 [PCE Classification](https://wandb.ai/additive-parts/synced-parts/reports/Point-Cloud-Encoder-Classification---Vmlldzo0MjY0MTY4?accessToken=krxx4xcdwttrzf1sz7fdefzc0w4rjf29uug0c52godobod1304w3rj5sh9tmmgun)
