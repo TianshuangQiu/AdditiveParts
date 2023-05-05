@@ -4,6 +4,7 @@ import numpy as np
 import trimesh
 import func_timeout
 
+
 # returns the F norm of the difference between the (most likely) stable pose and the identity matrix
 def trimesh_score_src(filepath):
     try:
@@ -16,12 +17,10 @@ def trimesh_score_src(filepath):
         score = np.linalg.norm(np.subtract(identity, rotation))
         return score
     except:
-	    pass
-	    return -98
+        return -98
     
 def trimesh_score(filepath):
     try:
-        return func_timeout.func_timeout(2, trimesh_score_src, args = (filepath,))
+        return func_timeout.func_timeout(20, trimesh_score_src, args = (filepath,))
     except func_timeout.FunctionTimedOut:
-        pass
 	    return -99
