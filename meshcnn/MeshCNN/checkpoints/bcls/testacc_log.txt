@@ -177,3 +177,6 @@ epoch: 55, TEST ACC: [79.845 %]
 ================ Testing Acc (Thu May  4 15:01:32 2023) ================
 epoch: -1, TEST ACC: [80.329 %]
 
+================ Testing Acc (Thu May  4 17:53:20 2023) ================
+epoch: -1, TEST ACC: [80.329 %]
+
