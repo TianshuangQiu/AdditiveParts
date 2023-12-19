@@ -10,4 +10,4 @@ with open("config/data_path.json", "r") as r:
 
 for key, value in drive_dict.items():
     gdown.download(url=value, output="data/" + key, fuzzy=True)
-    shutil.unpack_archive("data/" + key, f"data/{key}")
+    shutil.unpack_archive("data/" + key, f"data/{key[:-4]}")
