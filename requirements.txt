@@ -1,3 +1,4 @@
+# python 3.8
 autolab_core
 cowsay
 pyglet
@@ -7,3 +8,4 @@ torch-vision
 tqdm
 trimesh
 wandb
+gdown

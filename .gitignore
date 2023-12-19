@@ -137,3 +137,4 @@ dmypy.json
 
 wandb
 .vscode/settings.json
+data
