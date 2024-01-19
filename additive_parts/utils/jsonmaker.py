@@ -3,6 +3,7 @@ import json
 import csv
 import pdb
 import re
+from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map
 
 
@@ -19,10 +20,8 @@ class JsonMaker:
             if os.path.isfile(os.path.join(self.csv_dir, f)) and f.endswith(".csv")
         ]
         data_array = process_map(self._json_helper, files)
-        # data_array = []
-        # for f in files:
-        #     data_array.append(self._json_helper(f))
-
+        # for f in tqdm(files):
+        #     self._json_helper(f)
         vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
         for d in data_array:
             vox_256_dict.update(d[0])
@@ -40,18 +39,22 @@ class JsonMaker:
     def _json_helper(self, csv_path):
         with open(csv_path, newline="") as csvfile:
             data = list(csv.reader(csvfile))
-        print(csv_path)
         vox_256_dict, stl_dict, vox_64_dict = {}, {}, {}
         for d in data:
-            # csv_name = csv_path.split(os.sep)[-1][:-4]
-            # part_group = re.findall(r"\d+_", csv_name)[0][:-1]
-            # begin_idx = re.findall(r"_\d+", csv_name)[0][1:]
-            # end_idx = re.findall(r"-\d+", csv_name)[0][1:]
-            vox_256_path = (
-                f"{self.base_dir}/" + f"Binvox_files_default_res/{d[0][:-4]}.binvox"
-            )
-            stl_path = f"{self.base_dir}/" + f"repaired_files/{d[0]}"
-
+            # Regex matching since file naming was not conventional
+            try:
+                csv_name = csv_path.split(os.sep)[-1][:-4]
+                part_group = re.findall(r"\d+_", csv_name)[0][:-1]
+                begin_idx = re.findall(r"_\d+", csv_name)[0][1:]
+                end_idx = re.findall(r"-\d+", csv_name)[0][1:]
+                vox_256_path = (
+                    f"{self.base_dir}/Binvox_files_default_res/{d[0][:-4]}.binvox"
+                )
+                stl_path = f"{self.base_dir}/parts_{part_group}, files {begin_idx} through {end_idx}/rotated_files/{d[0]}"
+                # pdb.set_trace()
+            except:
+                pdb.set_trace()
+                raise
             if os.path.isfile(vox_256_path):
                 vox_256_dict[vox_256_path] = d[1]
             if os.path.isfile(stl_path):

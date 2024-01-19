@@ -9,3 +9,4 @@ tqdm
 trimesh
 wandb
 gdown
+einops
