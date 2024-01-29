@@ -1,9 +1,9 @@
-import gdown
+# import gdown
 import json
 import shutil
 import os
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("/global/scratch/users/ethantqiu/data", exist_ok=True)
 
 with open("config/data_path.json", "r") as r:
     drive_dict = json.load(r)
@@ -11,9 +11,10 @@ with open("config/data_path.json", "r") as r:
 failed = []
 for key, value in drive_dict.items():
     try:
-        if not os.path.exists(f"data/{key}") and not os.path.exists(f"data/{key[:-4]}"):
-            gdown.download(url=value, output="data/" + key, fuzzy=True)
-            shutil.unpack_archive("data/" + key, f"data/{key[:-4]}")
+        if os.path.exists(f"/global/scratch/users/ethantqiu/data/{key}"):
+            # gdown.download(url=value, output="data/" + key, fuzzy=True)
+            print("unzipping" + key)
+            shutil.unpack_archive("/global/scratch/users/ethantqiu/data/" + key, f"/global/scratch/users/ethantqiu/data/{key[:-4]}")
     except:
         failed.append(key)
         pass
