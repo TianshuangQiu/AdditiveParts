@@ -39,12 +39,12 @@ class PointEncoder(nn.TransformerEncoderLayer):
         self.linear1 = nn.Linear(d_model // nhead, dim_feedforward, **factory_kwargs)
         self.linear2 = nn.Linear(dim_feedforward, d_model // nhead, **factory_kwargs)
 
-    def _ff_block(self, x: Tensor) -> Tensor:
-        c = self.d_model // self.nhead
-        n = x.shape[-1] // c
-        x = rearrange(x, "b h (c n) -> b (h n) c", c=c)
-        x = self.linear2(self.dropout(self.activation(self.linear1(x))))
-        return rearrange(self.dropout2(x), "b (h n) c -> b h (c n)", c=c, n=n)
+    # def _ff_block(self, x: Tensor) -> Tensor:
+    #     c = self.d_model // self.nhead
+    #     n = x.shape[-1] // c
+    #     x = rearrange(x, "b h (c n) -> b (h n) c", c=c)
+    #     x = self.linear2(self.dropout(self.activation(self.linear1(x))))
+    #     return rearrange(self.dropout2(x), "b (h n) c -> b h (c n)", c=c, n=n)
 
 
 class PointCloudProcessor(nn.Module):
@@ -76,7 +76,7 @@ class PointCloudProcessor(nn.Module):
         for i, l in enumerate(linear_layers):
             if i == 0:
                 self.post_process.append(
-                    nn.Linear(self.nhead * self.input_features * 3, l)
+                    nn.Linear(self.nhead * self.input_features, l)
                 )
                 self.post_process.append(nn.ReLU())
             elif i == len(linear_layers) - 1:
@@ -95,12 +95,5 @@ class PointCloudProcessor(nn.Module):
         out = self.encoder(
             tensors.repeat(1, 1, self.nhead), src_key_padding_mask=src_key_padding
         )
-        stacked = torch.concat(
-            [
-                torch.min(out, dim=1)[0],
-                torch.mean(out, dim=1),
-                torch.max(out, dim=1)[0],
-            ],
-            dim=1,
-        )
+        stacked = torch.mean(out, dim=1)
         return self.post_process(stacked)

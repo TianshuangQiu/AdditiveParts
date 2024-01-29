@@ -4,7 +4,7 @@ import os
 from torch import random
 from torch.utils.data.dataloader import DataLoader, Dataset
 import torch.nn.functional as F
-from torch.nn import _Loss
+import torch.nn as nn
 from torch.utils.data import random_split
 import numpy as np
 from tqdm import tqdm
@@ -32,8 +32,8 @@ class CloudDataset(Dataset):
     def __getitem__(self, index):
         entry = self.items[index]
         return torch.tensor(
-            point_cloudify(entry[0], 2048), dtype=torch.float
-        ), torch.tensor(min(float(entry[1]), 4.2672268993358955), dtype=torch.float)
+            point_cloudify("/global/scratch/users/ethantqiu/"+entry[0], 2048), dtype=torch.float
+        ), torch.tensor(float(entry[1])/100, dtype=torch.float)
 
     def __len__(self):
         return len(self.items)
@@ -45,12 +45,12 @@ def bmse_loss(inputs, targets, noise_sigma=8.0):
 
 def bmc_loss(pred, target, noise_var):
     logits = -0.5 * (pred - target.T).pow(2) / noise_var
-    loss = F.cross_entropy(logits, torch.arange(pred.shape[0]))
+    loss = F.cross_entropy(logits, torch.arange(pred.shape[0]).to(DEVICE))
     loss = loss * (2 * noise_var)
     return loss
 
 
-class BMCLoss(_Loss):
+class BMCLoss(nn.Module):
     def __init__(self, init_noise_sigma):
         super(BMCLoss, self).__init__()
         self.noise_sigma = torch.nn.Parameter(torch.tensor(init_noise_sigma))
@@ -82,7 +82,9 @@ REGRESSION = True
 if args.loss == "mse":
     LOSS = torch.nn.MSELoss()
 elif args.loss == "balanced":
-    LOSS = BMCLoss(init_noise_sigma)
+    LOSS = BMCLoss(8.0)
+elif args.loss == "l1":
+    LOSS = torch.nn.L1Loss()
 
 
 print("emptying cache")
@@ -104,11 +106,11 @@ print(
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 if args.loss == "balanced":
     optimizer.add_param_group(
-        {"params": criterion.noise_sigma, "lr": LR, "name": "noise_sigma"}
+        {"params": LOSS.noise_sigma, "lr": LR, "name": "noise_sigma"}
     )
 wandb.init(
     # set the wandb project where this run will be logged
-    project="additive manufacturing",
+    project="percentile24",
     # track hyperparameters and run metadata
     config={
         "learning_rate": LR,
@@ -129,10 +131,10 @@ save_path = "save"
 os.makedirs(save_path, exist_ok=True)
 
 
-train_dataset = CloudDataset(f"data/{args.num}.json")
-test_dataset = CloudDataset("data/test.json")
+train_dataset = CloudDataset(f"/global/scratch/users/ethantqiu/data/{args.num}.json")
+test_dataset = CloudDataset("/global/scratch/users/ethantqiu/data/benchmark.json")
 trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-testloader = DataLoader(test_dataset, batch_size=100, shuffle=False)
+testloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
 
 
 def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
@@ -141,7 +143,7 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
     for epoch in range(epochs):
         model.train()
         for idx, (data, labels) in enumerate(tqdm(trainloader)):
-            output = model(data.to(DEVICE))
+            output = torch.sigmoid(model(data.to(DEVICE)))
             loss = criterion(
                 output.float(),
                 labels.reshape((output.shape[0], -1)).to(DEVICE),
@@ -153,8 +155,8 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
             del loss
         with torch.no_grad():
             for idx, (data, labels) in enumerate(tqdm(testloader)):
-                output = model(data.to(DEVICE))
-                loss = torch.nn.L1Loss()(
+                output = torch.sigmoid(model(data.to(DEVICE)))
+                loss = torch.nn.MSELoss()(
                     output.float(),
                     labels.reshape((output.shape[0], -1)).to(DEVICE),
                 ).float()
