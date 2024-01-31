@@ -24,16 +24,23 @@ random.seed(0)
 
 
 class CloudDataset(Dataset):
-    def __init__(self, dict_path):
+    def __init__(self, dict_path, savio):
         with open(dict_path, "r") as r:
             dictionary = json.load(r, object_pairs_hook=OrderedDict)
         self.items = list(dictionary.items())
+        self.on_savio = savio
 
     def __getitem__(self, index):
         entry = self.items[index]
-        return torch.tensor(
-            point_cloudify("/global/scratch/users/ethantqiu/"+entry[0], 2048), dtype=torch.float
-        ), torch.tensor(float(entry[1])/100, dtype=torch.float)
+        if self.on_savio:
+            return torch.tensor(
+                point_cloudify("/global/scratch/users/ethantqiu/" + entry[0], 2048),
+                dtype=torch.float,
+            ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
+        else:
+            return torch.tensor(
+                point_cloudify("" + entry[0], 2048), dtype=torch.float
+            ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
 
     def __len__(self):
         return len(self.items)
@@ -69,6 +76,7 @@ parser.add_argument("batch_size", help="batch size", type=int)
 parser.add_argument("attn_repeat", help="num times of repeat", type=int)
 parser.add_argument("num_layer", help="num of attn layer", type=int)
 parser.add_argument("loss", help="type of loss for training")
+parser.add_argument("-savio", action="store_true", default=False)
 
 args = parser.parse_args()
 
@@ -130,9 +138,16 @@ wandb.init(
 save_path = "save"
 os.makedirs(save_path, exist_ok=True)
 
-
-train_dataset = CloudDataset(f"/global/scratch/users/ethantqiu/data/{args.num}.json")
-test_dataset = CloudDataset("/global/scratch/users/ethantqiu/data/benchmark.json")
+if args.savio:
+    train_dataset = CloudDataset(
+        f"/global/scratch/users/ethantqiu/data/{args.num}.json", args.savio
+    )
+    test_dataset = CloudDataset(
+        "/global/scratch/users/ethantqiu/data/benchmark.json", args.savio
+    )
+else:
+    train_dataset = CloudDataset(f"data/{args.num}.json", args.savio)
+    test_dataset = CloudDataset("data/benchmark.json", args.savio)
 trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 testloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
 
@@ -143,7 +158,7 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
     for epoch in range(epochs):
         model.train()
         for idx, (data, labels) in enumerate(tqdm(trainloader)):
-            output = torch.sigmoid(model(data.to(DEVICE)))
+            output = model(data.to(DEVICE))
             loss = criterion(
                 output.float(),
                 labels.reshape((output.shape[0], -1)).to(DEVICE),
@@ -155,7 +170,7 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
             del loss
         with torch.no_grad():
             for idx, (data, labels) in enumerate(tqdm(testloader)):
-                output = torch.sigmoid(model(data.to(DEVICE)))
+                output = model(data.to(DEVICE))
                 loss = torch.nn.MSELoss()(
                     output.float(),
                     labels.reshape((output.shape[0], -1)).to(DEVICE),
