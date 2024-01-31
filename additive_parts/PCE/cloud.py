@@ -63,21 +63,15 @@ class PointCloudProcessor(nn.Module):
         self.nhead = nhead
         self.input_features = input_features
         self.encoder = nn.TransformerEncoder(
-            PointEncoder(
-                input_features * nhead,
-                nhead,
-                dim_feedforward=dim_feedforward,
-                device=device,
-                batch_first=batch_first,
+            nn.TransformerEncoderLayer(
+                nhead * input_features, nhead, dim_feedforward, batch_first=batch_first
             ),
             nlayer,
         )
         self.post_process = nn.Sequential()
         for i, l in enumerate(linear_layers):
             if i == 0:
-                self.post_process.append(
-                    nn.Linear(self.nhead * self.input_features, l)
-                )
+                self.post_process.append(nn.Linear(self.nhead * self.input_features, l))
                 self.post_process.append(nn.ReLU())
             elif i == len(linear_layers) - 1:
                 if regression:
