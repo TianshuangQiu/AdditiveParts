@@ -101,7 +101,7 @@ print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
 
 model = PointCloudProcessor(
-    4, NUM_ATTN, NUM_LAYER, 64, True, [8, 4], device=DEVICE, regression=REGRESSION
+    4, NUM_ATTN, NUM_LAYER, 64, True, [1024, 128], device=DEVICE, regression=REGRESSION
 )
 model_type = "Point-cloud-transformer"
 
@@ -193,5 +193,5 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
         wandb.log_model(file_path, name=f"{args.name}_{epoch}")
 
 
-wandb.watch(model, log_freq=100, log_graph=True)
+# wandb.watch(model, log_freq=100, log_graph=True)
 train(model, optimizer, LOSS, EPOCH)
