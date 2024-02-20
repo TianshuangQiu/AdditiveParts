@@ -5,11 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import math
-from additive_parts.PCE.pointnet_util import (
-    PointNetSetAbstractionMsg,
-    PointNetSetAbstraction,
-)
-import pdb
+from .pointnet_util import PointNetSetAbstractionMsg, PointNetSetAbstraction
 
 
 # Mish - "Mish: A Self Regularized Non-Monotonic Neural Activation Function"
@@ -155,7 +151,7 @@ class Point_Transformer(nn.Module):
         in_channel = 3 if self.norm_channel else 0
 
         self.sa1 = PointNetSetAbstractionMsg(
-            2048,
+            256,
             [0.1, 0.2, 0.4],
             [16, 32, 64],
             in_channel,
@@ -192,7 +188,7 @@ class Point_Transformer(nn.Module):
         # Create Classification Head
 
         dim_flatten = out_dim * self.num_sort_nets * self.top_k
-        self.flatten_linear_ch = [dim_flatten, 512, 128, 1]
+        self.flatten_linear_ch = [dim_flatten, 512, 128, 40]
         self.flatten_linear = nn.ModuleList(
             [
                 nn.Linear(
@@ -232,7 +228,6 @@ class Point_Transformer(nn.Module):
             norm = None
 
         ## Set Abstraction with MSG
-        pdb.set_trace()
         l1_xyz, l1_points = self.sa1(xyz, norm)
         l2_xyz, l2_points = self.sa2(l1_xyz, l1_points)
         global_feat = torch.cat([l2_xyz, l2_points], dim=1)
@@ -279,7 +274,6 @@ class Point_Transformer(nn.Module):
         radius_centroids = query_points.unsqueeze(dim=-2)
 
         # This corresponds to g^j
-        pdb.set_trace()
         radius_grouped = torch.cat([radius_centroids, radius_points], dim=-2).unsqueeze(
             dim=1
         )
@@ -330,7 +324,7 @@ class Point_Transformer(nn.Module):
             else:
                 output = linear(output)
 
-        # output = F.log_softmax(output, -1)
+        output = F.log_softmax(output, -1)
 
         return output
 
