@@ -16,8 +16,8 @@ def point_cloudify(mesh_path, num_pts=2048):
     centered_pts = mesh.sample(num_pts)
     avg_dist = np.average(np.linalg.norm(centered_pts, axis=-1))
     centered_pts /= avg_dist
-    centered_pts = np.hstack([centered_pts, np.ones(len(centered_pts)).reshape(-1, 1)])
-    return centered_pts
+    # centered_pts = np.hstack([centered_pts, np.ones(len(centered_pts)).reshape(-1, 1)])
+    return centered_pts.T
 
 
 def seven_dim_extraction(mesh_path):

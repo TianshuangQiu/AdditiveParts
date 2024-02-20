@@ -9,6 +9,7 @@ from torch.utils.data import random_split
 import numpy as np
 from tqdm import tqdm
 from additive_parts.PCE.cloud import PointCloudProcessor
+from additive_parts.PCE.pointcloudnet import Point_Transformer
 import json
 import argparse
 import math
@@ -100,9 +101,24 @@ torch.cuda.empty_cache()
 print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
 
-model = PointCloudProcessor(
-    4, NUM_ATTN, NUM_LAYER, 64, True, [1024, 128], device=DEVICE, regression=REGRESSION
-)
+# model = PointCloudProcessor(
+#     4, NUM_ATTN, NUM_LAYER, 64, True, [1024, 128], device=DEVICE, regression=REGRESSION
+# )
+tsfm_config = config = {
+    "num_points": 2048,
+    "batch_size": args.batch_size,
+    "use_normals": False,
+    "optimizer": "RangerVA",
+    "lr": 0.001,
+    "decay_rate": 1e-06,
+    "epochs": 20,
+    "num_classes": 1,
+    "dropout": 0.4,
+    "M": 4,
+    "K": 64,
+    "d_m": 512,
+}
+model = Point_Transformer(tsfm_config)
 model_type = "Point-cloud-transformer"
 
 
@@ -131,6 +147,7 @@ wandb.init(
         "Model parameters": sum(
             p.numel() for p in model.parameters() if p.requires_grad
         ),
+        **tsfm_config,
     },
     name=args.name,
 )
