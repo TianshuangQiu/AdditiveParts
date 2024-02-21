@@ -97,7 +97,6 @@ elif args.loss == "l1":
 
 print("emptying cache")
 torch.cuda.empty_cache()
-print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
 
 model = PointCloudProcessor(
@@ -135,8 +134,7 @@ wandb.init(
     name=args.name,
 )
 
-save_path = "save"
-os.makedirs(save_path, exist_ok=True)
+
 
 if args.savio:
     train_dataset = CloudDataset(
@@ -145,11 +143,20 @@ if args.savio:
     test_dataset = CloudDataset(
         "/global/scratch/users/ethantqiu/data/benchmark.json", args.savio
     )
+    save_path = "/global/scratch/users/ethantqiu/model_weights"
+    
 else:
-    train_dataset = CloudDataset(f"data/{args.num}.json", args.savio)
+    train_dataset = CloudDataset(f"data/{sargs.num}.json", args.savio)
     test_dataset = CloudDataset("data/benchmark.json", args.savio)
+    save_path = "save"
+    
+os.makedirs(save_path, exist_ok=True)
 trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 testloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
+
+model = model.to(DEVICE)
+print(torch.cuda.memory_summary(device=None, abbreviated=False))
+
 
 
 def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
@@ -190,8 +197,7 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
             model.state_dict(),
             file_path,
         )
-        wandb.log_model(file_path, name=f"{args.name}_{epoch}")
+        # wandb.log_model(file_path, name=f"{args.name}_{epoch}")
 
 
-wandb.watch(model, log_freq=100, log_graph=True)
 train(model, optimizer, LOSS, EPOCH)
