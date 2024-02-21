@@ -8,7 +8,7 @@ def voxelize(mesh_path, voxel_dim):
     return mesh.voxelized(voxel_dim).matrix
 
 
-def point_cloudify(mesh_path, num_pts=2048):
+def point_cloudify(mesh_path, num_pts=2048, naive=False):
     mesh = trimesh.load(mesh_path)
     tsfm_matrix = np.eye(4)
     tsfm_matrix[:3, 3] = -mesh.center_mass
@@ -16,8 +16,9 @@ def point_cloudify(mesh_path, num_pts=2048):
     centered_pts = mesh.sample(num_pts)
     avg_dist = np.average(np.linalg.norm(centered_pts, axis=-1))
     centered_pts /= avg_dist
-    centered_pts = np.hstack([centered_pts, np.ones(len(centered_pts)).reshape(-1, 1)])
-    return centered_pts
+    if naive:
+        return np.hstack([centered_pts, np.ones(len(centered_pts)).reshape(-1, 1)])
+    return centered_pts.T
 
 
 def seven_dim_extraction(mesh_path):
