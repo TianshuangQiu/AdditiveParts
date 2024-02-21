@@ -147,7 +147,6 @@ wandb.init(
 )
 
 
-
 if args.savio:
     train_dataset = CloudDataset(
         f"/global/scratch/users/ethantqiu/data/{args.num}.json", args.savio
@@ -156,19 +155,18 @@ if args.savio:
         "/global/scratch/users/ethantqiu/data/benchmark.json", args.savio
     )
     save_path = "/global/scratch/users/ethantqiu/model_weights"
-    
+
 else:
-    train_dataset = CloudDataset(f"data/{sargs.num}.json", args.savio)
+    train_dataset = CloudDataset(f"data/{args.num}.json", args.savio)
     test_dataset = CloudDataset("data/benchmark.json", args.savio)
     save_path = "save"
-    
+
 os.makedirs(save_path, exist_ok=True)
 trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 testloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
 
 model = model.to(DEVICE)
 print(torch.cuda.memory_summary(device=None, abbreviated=False))
-
 
 
 def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
@@ -188,6 +186,7 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
             losses[0].append(loss.cpu().detach().numpy())
             del loss
         with torch.no_grad():
+            model.eval()
             for idx, (data, labels) in enumerate(tqdm(testloader)):
                 output = model(data.to(DEVICE))
                 loss = torch.nn.MSELoss()(
@@ -210,4 +209,6 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
             file_path,
         )
         # wandb.log_model(file_path, name=f"{args.name}_{epoch}")
+
+
 train(model, optimizer, LOSS, EPOCH)

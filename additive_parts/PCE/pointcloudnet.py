@@ -107,6 +107,7 @@ class PointTransformerCls(nn.Module):
             nn.Linear(256, 64),
             nn.ReLU(),
             nn.Linear(64, n_c),
+            nn.Sigmoid(),
         )
         self.nblocks = nblocks
 
