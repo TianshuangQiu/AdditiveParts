@@ -2,8 +2,7 @@ import random
 from autolab_core import gen_experiment_id
 
 rand_id = gen_experiment_id()
-PREFACE = """
-#!/bin/bash
+PREFACE = """#!/bin/bash
 # Job name:
 #SBATCH --job-name=%s
 #
@@ -46,5 +45,5 @@ for data in [10000, 50000, 100000]:
                             with open(f"{data}_gridsearch_{rand_id}.sh", "w") as w:
                                 w.write(PREFACE % rand_id)
                                 w.write(
-                                    f"python trainPCE.py transformer_search_{rand_id} {data} {epoch} {lr} {batch_size} {nneighbor} {nblocks} {transformer_dim} -savio\n"
+                                    f"python trainPCE.py TSFM_{data}_n_{nblocks}_dim_{transformer_dim} {data} {epoch} {lr} {batch_size} {nneighbor} {nblocks} {transformer_dim} -savio\n"
                                 )
