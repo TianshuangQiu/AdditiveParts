@@ -74,9 +74,10 @@ parser.add_argument("num", help="amount of data to use", type=int)
 parser.add_argument("epoch", help="num of epochs", type=int)
 parser.add_argument("lr", help="learning rate", type=float)
 parser.add_argument("batch_size", help="batch size", type=int)
-parser.add_argument("attn_repeat", help="num times of repeat", type=int)
-parser.add_argument("num_layer", help="num of attn layer", type=int)
-parser.add_argument("loss", help="type of loss for training")
+parser.add_argument("nneighbor", help="num times of KNN", type=int)
+parser.add_argument("nblocks", help="num of attn layer", type=int)
+parser.add_argument("transformer_dim", help="transformer dim", type=int)
+parser.add_argument("-loss", help="type of loss for training", default="l1")
 parser.add_argument("-savio", action="store_true", default=False)
 
 args = parser.parse_args()
@@ -84,8 +85,8 @@ args = parser.parse_args()
 EPOCH = args.epoch
 LR = args.lr
 BATCH_SIZE = args.batch_size
-NUM_ATTN = args.attn_repeat
-NUM_LAYER = args.num_layer
+# NUM_ATTN = args.attn_repeat
+# NUM_LAYER = args.num_layer
 DEVICE = "cuda"
 REGRESSION = True
 if args.loss == "mse":
@@ -99,21 +100,17 @@ elif args.loss == "l1":
 print("emptying cache")
 torch.cuda.empty_cache()
 
-
-# model = PointCloudProcessor(
-#     4, NUM_ATTN, NUM_LAYER, 64, True, [1024, 128], device=DEVICE, regression=REGRESSION
-# )
 tsfm_config = {
     "num_point": 2048,
     "num_class": 1,
     "batch_size": args.batch_size,
-    "nneighbor": 16,
-    "nblocks": 4,
-    "transformer_dim": 512,
+    "nneighbor": args.nneighbor,
+    "nblocks": args.nblocks,
+    "transformer_dim": args.transformer_dim,
     "input_dim": 2048,
 }
 model = PointTransformerCls(tsfm_config)
-model_type = "Point-cloud-transformer"
+model_type = "PointTransformerCls"
 
 
 print(torch.cuda.memory_summary(device=None, abbreviated=False))
@@ -122,25 +119,18 @@ print(
 )
 
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-if args.loss == "balanced":
-    optimizer.add_param_group(
-        {"params": LOSS.noise_sigma, "lr": LR, "name": "noise_sigma"}
-    )
+
 wandb.init(
     # set the wandb project where this run will be logged
-    project="percentile24",
+    project="PAPER",
     # track hyperparameters and run metadata
     config={
         "learning_rate": LR,
         "architecture": model_type,
-        "epochs": EPOCH,
+        "epochs_choice": EPOCH,
         "batch_size": BATCH_SIZE,
         "loss": LOSS,
-        "num_attn": NUM_ATTN,
-        "num_layer": NUM_LAYER,
-        "Model parameters": sum(
-            p.numel() for p in model.parameters() if p.requires_grad
-        ),
+        "num_parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
         **tsfm_config,
     },
     name=args.name,
@@ -163,7 +153,7 @@ else:
 
 os.makedirs(save_path, exist_ok=True)
 trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-testloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
+testloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 model = model.to(DEVICE)
 print(torch.cuda.memory_summary(device=None, abbreviated=False))
@@ -180,6 +170,7 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
                 output.float(),
                 labels.reshape((output.shape[0], -1)).to(DEVICE),
             ).float()
+            print(loss)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
