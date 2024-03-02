@@ -13,7 +13,7 @@ def point_cloudify(mesh_path, num_pts=2048, naive=False):
     tsfm_matrix = np.eye(4)
     tsfm_matrix[:3, 3] = -mesh.center_mass
     mesh = mesh.apply_transform(tsfm_matrix)
-    centered_pts = trimesh.sample.sample_surface_even(mesh, num_pts, seed=0)
+    centered_pts = trimesh.sample.sample_surface(mesh, num_pts, seed=0)[0]
     nomralizing_dist = np.max(np.linalg.norm(centered_pts, axis=-1))
     centered_pts /= nomralizing_dist
     if naive:
