@@ -1,7 +1,5 @@
 import random
-from autolab_core import gen_experiment_id
 
-rand_id = gen_experiment_id()
 PREFACE = """#!/bin/bash
 # Job name:
 #SBATCH --job-name=%s
@@ -28,22 +26,23 @@ PREFACE = """#!/bin/bash
 #SBATCH --gres=gpu:GTX2080TI:1
 #
 # Wall clock limit:
-#SBATCH --time=30:00:00
+#SBATCH --time=10:00:00
 #
 ## Command(s) to run (example):
 module load python/3.8.8
 source activate /global/scratch/users/ethantqiu/envs/3d
 """
-for data in [10000, 50000, 100000]:
+for data in [10000]:
     for epoch in [10, 20]:
         for lr in [0.01, 0.001]:
             for batch_size in [16]:
-                for nneighbor in [16, 128]:
+                for nneighbor in [16, 64]:
                     for nblocks in [2, 4]:
-                        for transformer_dim in [64, 128, 256]:
-                            rand_id = gen_experiment_id()
+                        for transformer_dim in [64, 256]:
+                            rand_id = f"TSFM_{data}_n_{nblocks}_dim_{transformer_dim}_epoch{epoch}_neighb_{nneighbor}_lr_{lr}"
                             with open(f"{data}_gridsearch_{rand_id}.sh", "w") as w:
                                 w.write(PREFACE % rand_id)
                                 w.write(
-                                    f"python trainPCE.py TSFM_{data}_n_{nblocks}_dim_{transformer_dim} {data} {epoch} {lr} {batch_size} {nneighbor} {nblocks} {transformer_dim} -savio\n"
+                                    f"python scripts/trainPCE.py TSFM_{data}_n_{nblocks}_dim_{transformer_dim}_seeded {data} {epoch} {lr} {batch_size} {nneighbor} {nblocks} {transformer_dim} -savio\n"
                                 )
+                                
