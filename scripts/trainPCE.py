@@ -134,6 +134,7 @@ wandb.init(
         **tsfm_config,
     },
     name=args.name,
+    dir="global/scratch/users/ethantqiu/wandb",
 )
 
 
@@ -170,17 +171,17 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
                 output.float(),
                 labels.reshape((output.shape[0], -1)).to(DEVICE),
             ).float()
-            print(loss)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             losses[0].append(loss.cpu().detach().numpy())
+            wandb.log({"batch loss": loss})
             del loss
         with torch.no_grad():
             model.eval()
             for idx, (data, labels) in enumerate(tqdm(testloader)):
                 output = model(data.to(DEVICE))
-                loss = torch.nn.MSELoss()(
+                loss = torch.nn.L1Loss()(
                     output.float(),
                     labels.reshape((output.shape[0], -1)).to(DEVICE),
                 ).float()
