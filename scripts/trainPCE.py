@@ -35,12 +35,14 @@ class CloudDataset(Dataset):
         entry = self.items[index]
         if self.on_savio:
             return torch.tensor(
-                point_cloudify("/global/scratch/users/ethantqiu/" + entry[0], 2048),
+                point_cloudify(
+                    "/global/scratch/users/ethantqiu/" + entry[0], args.input_dim
+                ),
                 dtype=torch.float,
             ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
         else:
             return torch.tensor(
-                point_cloudify("" + entry[0], 2048), dtype=torch.float
+                point_cloudify("" + entry[0], args.input_dim), dtype=torch.float
             ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
 
     def __len__(self):
