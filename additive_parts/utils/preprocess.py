@@ -11,7 +11,7 @@ def voxelize(mesh_path, voxel_dim):
 def point_cloudify(mesh_path, num_pts=2048, naive=False):
     mesh = trimesh.load(mesh_path)
     tsfm_matrix = np.eye(4)
-    tsfm_matrix[:3, 3] = -mesh.center_mass
+    tsfm_matrix[:3, 3] = -mesh.centroid
     mesh = mesh.apply_transform(tsfm_matrix)
     centered_pts = trimesh.sample.sample_surface(mesh, num_pts, seed=0)[0]
     nomralizing_dist = np.max(np.linalg.norm(centered_pts, axis=-1))
