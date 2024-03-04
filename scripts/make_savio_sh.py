@@ -33,16 +33,17 @@ module load python/3.8.8
 source activate /global/scratch/users/ethantqiu/envs/3d
 """
 for data in [10000]:
-    for epoch in [10, 20]:
-        for lr in [0.01, 0.001]:
-            for batch_size in [16]:
-                for nneighbor in [16, 64]:
-                    for nblocks in [2, 4]:
+    for epoch in [10]:
+        for lr in [0.001]:
+            for batch_size in [4]:
+                for nneighbor in [64]:
+                    for nblocks in [2]:
                         for transformer_dim in [64, 256]:
-                            rand_id = f"TSFM_{data}_n_{nblocks}_dim_{transformer_dim}_epoch{epoch}_neighb_{nneighbor}_lr_{lr}"
-                            with open(f"{data}_gridsearch_{rand_id}.sh", "w") as w:
-                                w.write(PREFACE % rand_id)
-                                w.write(
-                                    f"python scripts/trainPCE.py TSFM_{data}_n_{nblocks}_dim_{transformer_dim}_seeded {data} {epoch} {lr} {batch_size} {nneighbor} {nblocks} {transformer_dim} -savio\n"
-                                )
+                            for input_dim in [16384]:
+                                rand_id = f"{input_dim}pts_TSFM_{data}_n_{nblocks}_dim_{transformer_dim}_epoch{epoch}_neighb_{nneighbor}_lr_{lr}"
+                                with open(f"{data}_gridsearch_{rand_id}.sh", "w") as w:
+                                    w.write(PREFACE % rand_id)
+                                    w.write(
+                                        f"python scripts/trainPCE.py {input_dim}pts_TSFM_{data}_n_{nblocks}_dim_{transformer_dim}_seeded {data} {epoch} {lr} {batch_size} {nneighbor} {nblocks} {transformer_dim} -input_dim {input_dim} -savio\n"
+                                    )
                                 
