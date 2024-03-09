@@ -2,27 +2,21 @@ import torch
 import wandb
 import os
 from torch import random
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data.dataloader import DataLoader, Dataset
 import torch.nn.functional as F
 import torch.nn as nn
 from torch.utils.data import random_split
 import numpy as np
 from tqdm import tqdm
 from additive_parts.PCE.cloud import PointCloudProcessor
-from additive_parts.PCE.pointcloudnet import PointTransformerCls
-from additive_parts.meshcnn.MeshCNN.models.networks import define_classifier
+from additive_parts.baseline.baseline_model import NaiveBaseline
 import json
 import argparse
-import pymeshlab as ml
+import trimesh
 import math
 from datetime import datetime
 from collections import OrderedDict
 from additive_parts.utils.preprocess import point_cloudify
-from additive_parts.meshcnn.MeshCNN.models.layers.mesh import Mesh
-from additive_parts.meshcnn.MeshCNN.util.util import is_mesh_file, pad
-
-import trimesh
-
 import random
 import pdb
 
@@ -31,48 +25,31 @@ np.random.seed(0)
 random.seed(0)
 
 
-class MeshDataset(Dataset):
-    def __init__(self, dict_path, args):
+def compute_stable_pose(mesh_path: str):
+    mesh = trimesh.load(mesh_path)
+    stable_pose, prob = mesh.compute_stable_poses()
+    # returns the norm of rotation matrices scaled by their probabilities
+    return np.linalg.norm((stable_pose[:, :3, :3] - np.eye(3)) * prob.reshape(-1, 1, 1))
+
+
+class StpDataset(Dataset):
+    def __init__(self, dict_path, savio):
         with open(dict_path, "r") as r:
             dictionary = json.load(r, object_pairs_hook=OrderedDict)
         self.items = list(dictionary.items())
-        self.on_savio = args.savio
-        self.opt = args
+        self.on_savio = savio
 
     def __getitem__(self, index):
         entry = self.items[index]
         if self.on_savio:
-            return Mesh(
-                "/global/scratch/users/ethantqiu/" + entry[0],
-                args,
-                False,
-                "/global/scratch/users/ethantqiu/exp",
+            return torch.tensor(
+                compute_stable_pose("/global/scratch/users/ethantqiu/" + entry[0]),
+                dtype=torch.float,
             ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
         else:
-            ms = ml.MeshSet()
-            ms.load_new_mesh("" + entry[0])
-            m = ms.current_mesh()
-            ms.meshing_decimation_quadric_edge_collapse(
-                targetfacenum=2048, preservenormal=True
-            )
-
-            ms.save_current_mesh("" + entry[0] + ".obj")
-            mesh = Mesh(
-                "" + entry[0] + ".obj",
-                args,
-                False,
-                None,
-            )
-            label = torch.tensor(float(entry[1]) / 100, dtype=torch.float)
-            meta = {"mesh": mesh, "label": label}
-            # get edge features
-            edge_features = mesh.extract_features()
-            edge_features = pad(edge_features, self.opt.ninput_edges)
-            meta["edge_features"] = (edge_features - np.mean(edge_features)) / np.std(
-                edge_features
-            )
-            meta["file"] = entry
-            return meta
+            return torch.tensor(
+                compute_stable_pose("" + entry[0]), dtype=torch.float
+            ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
 
     def __len__(self):
         return len(self.items)
@@ -105,15 +82,6 @@ parser.add_argument("num", help="amount of data to use", type=int)
 parser.add_argument("epoch", help="num of epochs", type=int)
 parser.add_argument("lr", help="learning rate", type=float)
 parser.add_argument("batch_size", help="batch size", type=int)
-parser.add_argument("-norm", help="normalization type", default="group")
-parser.add_argument("-num_groups", help="num of groups", default=1, type=int)
-parser.add_argument("-pool_res", help="num of groups", default=32, type=int)
-parser.add_argument("-fc_n", help="num of groups", default=32, type=int)
-parser.add_argument("-resblocks", help="num of blocks", default=4, type=int)
-parser.add_argument("-nf0", help="num of conv", default=128, type=int)
-parser.add_argument("-num_aug", help="num of augs", default=32, type=int)
-parser.add_argument("-conv", help="conv_hyper_param", default=5, type=int)
-parser.add_argument("-ninput_edges", help="conv_hyper_param", default=4096, type=int)
 parser.add_argument("-loss", help="type of loss for training", default="l1")
 parser.add_argument("-savio", action="store_true", default=False)
 
@@ -122,8 +90,6 @@ args = parser.parse_args()
 EPOCH = args.epoch
 LR = args.lr
 BATCH_SIZE = args.batch_size
-# NUM_ATTN = args.attn_repeat
-# NUM_LAYER = args.num_layer
 DEVICE = "cuda"
 REGRESSION = True
 if args.loss == "mse":
@@ -137,14 +103,9 @@ elif args.loss == "l1":
 print("emptying cache")
 torch.cuda.empty_cache()
 
-net_config = {
-    "batch_size": args.batch_size,
-}
-args.pool_res = [args.pool_res]
-model = define_classifier(
-    args.conv, [args.nf0], args.ninput_edges, 1, args, [], "mconvnet", "normal", 0.01
-)
-model_type = "MeshCNN"
+tsfm_config = {}
+model = NaiveBaseline()
+model_type = "StablePoseBaseline"
 
 
 print(torch.cuda.memory_summary(device=None, abbreviated=False))
@@ -165,7 +126,6 @@ wandb.init(
         "batch_size": BATCH_SIZE,
         "loss": LOSS,
         "num_parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
-        **net_config,
     },
     name=args.name,
     dir="global/scratch/users/ethantqiu/wandb",
@@ -173,40 +133,22 @@ wandb.init(
 
 
 if args.savio:
-    train_dataset = MeshDataset(
-        f"/global/scratch/users/ethantqiu/data/{args.num}.json", args
+    train_dataset = StpDataset(
+        f"/global/scratch/users/ethantqiu/data/{args.num}.json", args.savio
     )
-    test_dataset = MeshDataset(
-        "/global/scratch/users/ethantqiu/data/benchmark.json", args
+    test_dataset = StpDataset(
+        "/global/scratch/users/ethantqiu/data/benchmark.json", args.savio
     )
     save_path = "/global/scratch/users/ethantqiu/model_weights"
 
 else:
-    train_dataset = MeshDataset(f"data/{args.num}.json", args)
-    test_dataset = MeshDataset("data/benchmark.json", args)
+    train_dataset = StpDataset(f"data/{args.num}.json", args.savio)
+    test_dataset = StpDataset("data/benchmark.json", args.savio)
     save_path = "save"
 
-
 os.makedirs(save_path, exist_ok=True)
-
-
-def collate_fn(batch):
-    """Creates mini-batch tensors
-    We should build custom collate_fn rather than using default collate_fn
-    """
-    meta = {}
-    keys = batch[0].keys()
-    for key in keys:
-        meta.update({key: np.array([d[key] for d in batch])})
-    return meta
-
-
-trainloader = DataLoader(
-    train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_fn
-)
-testloader = DataLoader(
-    test_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_fn
-)
+trainloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+testloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 model = model.to(DEVICE)
 print(torch.cuda.memory_summary(device=None, abbreviated=False))
@@ -217,11 +159,8 @@ def train(model, optimizer: torch.optim.Optimizer, criterion, epochs):
     losses = [[], []]
     for epoch in range(epochs):
         model.train()
-        for idx, mesh_dict in enumerate(tqdm(trainloader)):
-            labels = mesh_dict["label"]
-            input_edge_features = torch.from_numpy(mesh_dict["edge_features"]).float()
-            edge_features = input_edge_features.to("cuda").requires_grad_(True)
-            output = model(x=edge_features, mesh=mesh_dict["mesh"])
+        for idx, (data, labels) in enumerate(tqdm(trainloader)):
+            output = model(data.to(DEVICE))
             loss = criterion(
                 output.float(),
                 labels.reshape((output.shape[0], -1)).to(DEVICE),
