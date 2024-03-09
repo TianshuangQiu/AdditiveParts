@@ -32,6 +32,10 @@ for i in tqdm(items):
 plt.clf()
 plt.hist(labels)
 plt.title(f"{len(labels)} elements")
+
+with open("data/1000.json", "w") as w:
+    json.dump({i: j for i, j in rest_of_data[10000:11000]}, w)
+
 plt.savefig(f"benchmark.png")
 
 with open("data/benchmark.json", "w") as w:
