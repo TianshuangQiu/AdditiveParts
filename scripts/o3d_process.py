@@ -2,14 +2,16 @@ import trimesh
 import numpy as np
 import open3d as o3d
 import os
+import json
 import torch
+from tqdm import tqdm
 
 X_RES = 64
 Y_RES = 64
 NUM_SLICE = 64
 
 
-def mesh_process_pipelines(mesh_path, output_path):
+def mesh_process_pipeline(mesh_path, output_path):
     original_mesh = trimesh.load_mesh(mesh_path)
     original_mesh.vertices -= original_mesh.centroid
     original_mesh.vertices /= np.max(np.linalg.norm(original_mesh.vertices, axis=1))
@@ -114,19 +116,20 @@ def mesh_process_pipelines(mesh_path, output_path):
     write_path = mesh_path.replace("rotated_files", "depth_image")
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
     torch.save(
-        torch.tensor(depth_images),
+        torch.from_numpy(np.array(depth_images)),
         write_path + ".pth",
     )
 
     write_path = mesh_path.replace("rotated_files", "distance_field")
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
     torch.save(
-        torch.tensor(distance_fields),
+        torch.from_numpy(np.array(distance_fields)),
         write_path + ".pth",
     )
 
 
-mesh_process_pipelines(
-    "/Users/qit1syv/tmp/AdditiveParts/data/part.stl",
-    "/Users/qit1syv/tmp/AdditiveParts/data",
-)
+with open("/global/scratch/users/ethantqiu/data/agg.json") as r:
+    run_dict = json.load(r)
+
+for file in tqdm(run_dict.keys()):
+    mesh_process_pipeline(f"/global/scratch/users/ethantqiu/{file}", "/global/scratch/users/ethantqiu/data")
