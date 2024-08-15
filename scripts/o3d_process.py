@@ -5,13 +5,14 @@ import os
 import json
 import torch
 from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
 
 X_RES = 64
 Y_RES = 64
 NUM_SLICE = 64
 
 
-def mesh_process_pipeline(mesh_path, output_path):
+def mesh_process_pipeline(mesh_path, output_path, tmp_path):
     original_mesh = trimesh.load_mesh(mesh_path)
     original_mesh.vertices -= original_mesh.centroid
     original_mesh.vertices /= np.max(np.linalg.norm(original_mesh.vertices, axis=1))
@@ -43,9 +44,11 @@ def mesh_process_pipeline(mesh_path, output_path):
         min_bounds = np.min(original_mesh.vertices, axis=0)
         max_bounds = np.max(original_mesh.vertices, axis=0)
 
-        trimesh.exchange.export.export_mesh(sliced_mesh, f"{output_path}/tmp_slice.stl")
+        trimesh.exchange.export.export_mesh(
+            sliced_mesh, f"{output_path}/{tmp_path}.stl"
+        )
         mesh = o3d.t.geometry.TriangleMesh.from_legacy(
-            o3d.io.read_triangle_mesh(f"{output_path}/tmp_slice.stl")
+            o3d.io.read_triangle_mesh(f"{output_path}/{tmp_path}.stl")
         )
         # Create scene and add the cube mesh
         scene = o3d.t.geometry.RaycastingScene()
@@ -131,5 +134,22 @@ def mesh_process_pipeline(mesh_path, output_path):
 with open("/global/scratch/users/ethantqiu/data/agg.json") as r:
     run_dict = json.load(r)
 
-for file in tqdm(run_dict.keys()):
-    mesh_process_pipeline(f"/global/scratch/users/ethantqiu/{file}", "/global/scratch/users/ethantqiu/data")
+all_files = run_dict.keys()
+splits = np.array_split(all_files, 16)
+
+
+def mesh_process_wrapper(input_tuple):
+    i, split = input_tuple
+    for file in tqdm(split):
+        mesh_process_pipeline(
+            f"/global/scratch/users/ethantqiu/{file}",
+            "/global/scratch/users/ethantqiu/data",
+            f"tmp_{i}",
+        )
+
+
+process_map(
+    mesh_process_wrapper,
+    [(i, split) for i, split in enumerate(splits)],
+    max_workers=16,
+)
