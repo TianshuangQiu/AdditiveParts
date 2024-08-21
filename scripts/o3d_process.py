@@ -6,6 +6,7 @@ import json
 import torch
 from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map
+import argparse
 
 X_RES = 64
 Y_RES = 64
@@ -131,11 +132,19 @@ def mesh_process_pipeline(mesh_path, output_path, tmp_path):
     )
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--assignment", type=int, default=0)
+args = parser.parse_args()
+
+ASSIGNMENT = args.assignment
+print(f"Running assignment {ASSIGNMENT}")
+
 with open("/global/scratch/users/ethantqiu/data/agg.json") as r:
     run_dict = json.load(r)
 
+assignment_split = np.array_split(list(run_dict.keys()), 8)[ASSIGNMENT]
 all_files = run_dict.keys()
-splits = np.array_split(all_files, 16)
+splits = np.array_split(all_files, 4)
 
 
 def mesh_process_wrapper(input_tuple):
@@ -144,12 +153,11 @@ def mesh_process_wrapper(input_tuple):
         mesh_process_pipeline(
             f"/global/scratch/users/ethantqiu/{file}",
             "/global/scratch/users/ethantqiu/data",
-            f"tmp_{i}",
+            f"tmp_{i}_ASSIGNMENT_{ASSIGNMENT}",
         )
 
 
 process_map(
     mesh_process_wrapper,
     [(i, split) for i, split in enumerate(splits)],
-    max_workers=16,
 )
