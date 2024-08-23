@@ -11,7 +11,9 @@ Y_RES = 64
 original_mesh = trimesh.load_mesh("data/test.obj")
 original_mesh.vertices -= original_mesh.centroid
 original_mesh.vertices /= np.max(np.linalg.norm(original_mesh.vertices, axis=1))
-centroid = original_mesh.centroid
+centroid = original_mesh.centroid.copy()
+centroid[0] += 1e-10
+
 total_range = np.max(original_mesh.vertices, axis=0) - np.min(
     original_mesh.vertices, axis=0
 )
@@ -91,7 +93,7 @@ for i, bottom in enumerate(
 
     trimesh.exchange.export.export_mesh(sliced_mesh, "data/sliced_part.stl")
     rot_matrix = transformations.rotation_matrix(np.pi, [1, 0, 0], [0, 0, 0])
-    rotated_slice = sliced_mesh.apply_transform(rot_matrix)
+    sliced_mesh = sliced_mesh.apply_transform(rot_matrix)
     trimesh.exchange.export.export_mesh(sliced_mesh, "data/rotated_sliced_part.stl")
     # viewer.add_mesh(rotated_slice)
     # viewer.show()
@@ -109,10 +111,9 @@ for i, bottom in enumerate(
         # Rays are 6D vectors with origin and ray direction.
         # Here we use a helper function to create rays for a pinhole camera.
 
-        ray_center = centroid
         rays = scene.create_rays_pinhole(
             fov_deg=fov,
-            center=ray_center,
+            center=centroid,
             eye=np.array([0, 0, 1]),
             up=[0, 0, 1],
             width_px=X_RES,
