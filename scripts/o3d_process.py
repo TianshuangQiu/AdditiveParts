@@ -120,14 +120,14 @@ def mesh_process_pipeline(mesh_path, output_path, tmp_path):
     write_path = mesh_path.replace("rotated_files", "depth_image")
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
     torch.save(
-        torch.from_numpy(np.array(depth_images)),
+        torch.from_numpy(np.array(depth_images[::-1])),
         write_path + ".pth",
     )
 
     write_path = mesh_path.replace("rotated_files", "distance_field")
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
     torch.save(
-        torch.from_numpy(np.array(distance_fields)),
+        torch.from_numpy(np.array(distance_fields[::-1])),
         write_path + ".pth",
     )
 
@@ -139,25 +139,35 @@ args = parser.parse_args()
 ASSIGNMENT = args.assignment
 print(f"Running assignment {ASSIGNMENT}")
 
-with open("/global/scratch/users/ethantqiu/data/agg.json") as r:
+with open("/global/scratch/users/ethantqiu/data/agg.json", 'r') as r:
     run_dict = json.load(r)
 
-assignment_split = np.array_split(list(run_dict.keys()), 8)[ASSIGNMENT]
-all_files = run_dict.keys()
-splits = np.array_split(all_files, 4)
+files = np.array(list(run_dict.keys()))
+assignment_split = np.array_split(files, 8)[ASSIGNMENT]
 
-
-def mesh_process_wrapper(input_tuple):
-    i, split = input_tuple
-    for file in tqdm(split):
-        mesh_process_pipeline(
+for i, file in enumerate(tqdm(assignment_split)):
+    mesh_process_pipeline(
             f"/global/scratch/users/ethantqiu/{file}",
             "/global/scratch/users/ethantqiu/data",
-            f"tmp_{i}_ASSIGNMENT_{ASSIGNMENT}",
-        )
+            f"tmp_ASSIGNMENT_{ASSIGNMENT}",
+    )
+
+# splits = np.array_split(assignment_split, 4)
 
 
-process_map(
-    mesh_process_wrapper,
-    [(i, split) for i, split in enumerate(splits)],
-)
+# def mesh_process_wrapper(input_tuple):
+#     i, split = input_tuple
+#     for idx, file in enumerate(tqdm(split)):
+#         mesh_process_pipeline(
+#             f"/global/scratch/users/ethantqiu/{file}",
+#             "/global/scratch/users/ethantqiu/data",
+#             f"tmp_{i}_ASSIGNMENT_{ASSIGNMENT}",
+#         )
+#         if idx%100 == 0:
+#             print(idx)
+
+
+# process_map(
+#     mesh_process_wrapper,
+#     [(i, split) for i, split in enumerate(splits)],
+# )
