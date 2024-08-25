@@ -180,7 +180,7 @@ with open("/global/scratch/users/ethantqiu/data/agg.json", "r") as r:
     run_dict = json.load(r)
 
 files = np.array(list(run_dict.keys()))
-assignment_split = np.array_split(files, 8)[ASSIGNMENT]
+assignment_split = np.array_split(files, 16)[ASSIGNMENT]
 
 for i, file in enumerate(tqdm(assignment_split)):
     mesh_process_pipeline(
