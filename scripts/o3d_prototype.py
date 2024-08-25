@@ -8,7 +8,7 @@ import open3d as o3d
 X_RES = 64
 Y_RES = 64
 
-original_mesh = trimesh.load_mesh("data/test.obj")
+original_mesh = trimesh.load_mesh("data/empire.obj")
 original_mesh.vertices -= original_mesh.centroid
 original_mesh.vertices /= np.max(np.linalg.norm(original_mesh.vertices, axis=1))
 centroid = original_mesh.centroid.copy()
@@ -43,12 +43,12 @@ for i, bottom in enumerate(
         centroid[0] - stride * X_RES / 2,
         centroid[0] + stride * X_RES / 2,
         stride,
-    )
+    )[:X_RES]
     y = np.arange(
         centroid[1] - stride * Y_RES / 2,
         centroid[1] + stride * Y_RES / 2,
         stride,
-    )
+    )[:Y_RES]
 
     # full coordinate arrays
     xx, yy = np.meshgrid(x, y)
@@ -141,6 +141,6 @@ for i, bottom in enumerate(
         depth_image = ans["t_hit"].cpu().numpy().reshape(Y_RES, X_RES)
         depth_image = np.nan_to_num(depth_image, nan=0.0, posinf=0.0, neginf=0.0)
         plt.imshow(depth_image)
-        plt.show()
+        # plt.show()
 
     top = bottom

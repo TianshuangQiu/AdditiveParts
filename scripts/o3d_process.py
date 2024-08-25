@@ -52,12 +52,12 @@ def mesh_process_pipeline(mesh_path, output_path, tmp_path):
             centroid[0] - stride * X_RES / 2,
             centroid[0] + stride * X_RES / 2,
             stride,
-        )
+        )[:X_RES]
         y = np.arange(
             centroid[1] - stride * Y_RES / 2,
             centroid[1] + stride * Y_RES / 2,
             stride,
-        )
+        )[:Y_RES]
 
         # full coordinate arrays
         xx, yy = np.meshgrid(x, y)
