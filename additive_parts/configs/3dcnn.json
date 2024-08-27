@@ -1,0 +1,8 @@
+{
+  "data_path": "/global/scratch/users/ethantqiu",
+  "train_parts": "data/1000.json",
+  "val_parts": "data/benchmark.json",
+  "resolution": 64,
+  "wandb_path": "/global/scratch/users/ethantqiu/wandb",
+  "baseline": 0
+}

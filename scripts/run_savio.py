@@ -4,7 +4,9 @@ import subprocess
 import time
 import pdb
 
-for path in glob("*.sh"):
+paths = glob("*.sh")
+paths.sort()
+for path in paths:
     subprocess.run(
         [
             "sbatch",
