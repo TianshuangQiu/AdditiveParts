@@ -97,7 +97,7 @@ def mesh_process_pipeline(mesh_path, output_path, tmp_path):
             ],
         )
         # normalize verts
-        sliced_mesh.vertices -= sliced_mesh.centroid
+        sliced_mesh.vertices -= np.array([0, 0, sliced_mesh.centroid[2]])
 
         trimesh.exchange.export.export_mesh(
             sliced_mesh, f"{output_path}/{tmp_path}.stl"
@@ -148,23 +148,26 @@ def mesh_process_pipeline(mesh_path, output_path, tmp_path):
     top = bottom
 
     write_path = mesh_path.replace("rotated_files", "depth_image")
+    depth_tensor = torch.from_numpy(np.array(depth_images[::-1]))
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
     torch.save(
-        torch.from_numpy(np.array(depth_images[::-1])),
+        depth_tensor,
         write_path + ".pth",
     )
 
     write_path = mesh_path.replace("rotated_files", "rotated_depth_image")
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
+    rotated_depth_tensor = torch.from_numpy(np.array(rotated_depth_images[::-1]))
     torch.save(
-        torch.from_numpy(np.array(rotated_depth_images[::-1])),
+        rotated_depth_tensor,
         write_path + ".pth",
     )
 
     write_path = mesh_path.replace("rotated_files", "distance_field")
     os.makedirs("/".join(write_path.split("/")[:-1]), exist_ok=True)
+    distance_tensor = torch.from_numpy(np.array(distance_fields[::-1]))
     torch.save(
-        torch.from_numpy(np.array(distance_fields[::-1])),
+        distance_tensor,
         write_path + ".pth",
     )
 
@@ -176,15 +179,21 @@ args = parser.parse_args()
 ASSIGNMENT = args.assignment
 print(f"Running assignment {ASSIGNMENT}")
 
-with open("/global/scratch/users/ethantqiu/data/agg.json", "r") as r:
+with open("data/50000.json", "r") as r:
     run_dict = json.load(r)
+with open("data/benchmark.json", "r") as r:
+    benchmark_dict = json.load(r)
+    run_dict.update(benchmark_dict)
 
 files = np.array(list(run_dict.keys()))
-assignment_split = np.array_split(files, 16)[ASSIGNMENT]
+assignment_split = files
+
+argument_tuple = [(file, "data", f"tmp{i}") for i, file in enumerate(assignment_split)]
+# process_map(mesh_process_pipeline, argument_tuple, max_workers=8, chunksize=125)
 
 for i, file in enumerate(tqdm(assignment_split)):
     mesh_process_pipeline(
-        f"/global/scratch/users/ethantqiu/{file}",
-        "/global/scratch/users/ethantqiu/data",
-        f"tmp_ASSIGNMENT_{ASSIGNMENT}",
+        f"{file}",
+        "data",
+        f"tmp",
     )

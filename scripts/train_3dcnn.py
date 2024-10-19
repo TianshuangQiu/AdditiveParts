@@ -58,7 +58,7 @@ def count_parameters(model):
 
 import json
 
-configs = json.load(open("Savio_config.json", "r"))
+configs = json.load(open("config/3dcnn_config.json", "r"))
 data_path = configs["data_path"]
 train_parts = configs["train_parts"]
 val_parts = configs["val_parts"]
@@ -66,12 +66,8 @@ resolution = configs["resolution"]
 wandb_path = configs["wandb_path"]
 baseline = configs["baseline"]
 
-dataset = FieldDepthDataset(
-    f"/global/scratch/users/ethantqiu/data/{args.num}.json", args.type
-)
-dataset_val = FieldDepthDataset(
-    f"/global/scratch/users/ethantqiu/data/benchmark.json", args.type
-)
+dataset = FieldDepthDataset(f"data/{args.num}.json", args.type)
+dataset_val = FieldDepthDataset(f"data/benchmark.json", args.type)
 # Get Model Class
 
 if baseline == 0:
@@ -108,6 +104,7 @@ def train_epoch(model, training_loader, loss_fn, optimizer):
 
         # Make predictions
         outputs = model(inputs)
+        outputs = torch.sigmoid(outputs)
 
         # Compute loss and its gradients
         loss = loss_fn(outputs, labels.float())
@@ -148,6 +145,7 @@ def validate(model, validation_loader, loss_fn):
             tic = time.time()
             outputs = model(inputs)
             toc = time.time()
+            outputs = torch.sigmoid(outputs)
             loss = loss_fn(outputs, labels.float())
             validation_loss += loss.item()
 
@@ -186,10 +184,10 @@ def evaluate(args, loss_fn):
     )
     print(count_parameters(model))
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
     for epoch in range(args.epochs):
-        wandb.log({"epoch": epoch})
+        # wandb.log({"epoch": epoch})
         # train
         tic = time.time()
         train_loss, inference_time, load_time = train_epoch(
@@ -202,6 +200,7 @@ def evaluate(args, loss_fn):
                 "train_time": round(toc - tic),
                 "train_time_batch_ms": inference_time,
                 "load_time_batch_ms": load_time,
+                "epoch": epoch,
             }
         )
         print(
@@ -220,6 +219,7 @@ def evaluate(args, loss_fn):
                 "r2": r2,
                 "validate_time": round(toc - tic),
                 "validate_time_batch_ms": inference_time,
+                "epoch": epoch,
             }
         )
         print(
@@ -230,9 +230,8 @@ def evaluate(args, loss_fn):
 
 
 def run(args=None):
-    training_set = train_parts[5:-5]
-    name = f"CNN_{args.type}_kernel{args.kernel_size}_activ{args.activation_fn} \
-            _e{args.epochs}_lr{args.learning_rate}_b{args.batch_size}"
+    training_set = args.num
+    name = f"CNN_new_{args.type}_kernel{args.kernel_size}_activ{args.activation_fn}_e{args.epochs}_lr{args.learning_rate}_b{args.batch_size}"
     # name = '3DCNN runtime testing'
     print(name)
 
@@ -252,7 +251,7 @@ def run(args=None):
 
     loss_fn = nn.L1Loss(reduction="mean")
     model = evaluate(args, loss_fn)
-    torch.save(model, "model.pt")
+    # torch.save(model, "model.pt")
 
 
 # # Start

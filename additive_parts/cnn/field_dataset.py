@@ -14,8 +14,8 @@ class FieldDepthDataset(Dataset):
     def __getitem__(self, index):
         entry = self.items[index]
         return torch.load(
-            entry[0].replace("rotated_files", self.dataset_type)[:-3] + "pth"
-        ), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
+            entry[0].replace("rotated_files", self.dataset_type) + ".pth"
+        ).unsqueeze(0), torch.tensor(float(entry[1]) / 100, dtype=torch.float)
 
     def __len__(self):
         return len(self.items)

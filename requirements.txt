@@ -10,3 +10,6 @@ trimesh
 wandb
 gdown
 einops
+open3d
+shapely
+prettytable

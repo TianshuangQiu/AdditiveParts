@@ -1,0 +1,8 @@
+{
+  "data_path": "/home/ethantqiu/AdditiveParts/data",
+  "train_parts": "data/1000.json",
+  "val_parts": "data/benchmark.json",
+  "resolution": 64,
+  "wandb_path": "/home/ethantqiu/AdditiveParts/wandb ",
+  "baseline": 0
+}
